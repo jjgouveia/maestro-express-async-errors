@@ -1,5 +1,5 @@
 {
-  "name": "express-async-handler",
+  "name": "express-hunter-errors",
   "version": "1.2.0",
   "description": "Express Error Handler for Async Functions",
   "main": "index.js",

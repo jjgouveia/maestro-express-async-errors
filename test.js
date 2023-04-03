@@ -8,13 +8,13 @@ chai.should()
 
 
 
-const asyncUtil = require('./index')
+const handler = require('./index')
 
-describe('asyncUtil', () => {
+describe('handler', () => {
 
   it('should catch exceptions of a function passed into it', async () => {
     const error = new Error('catch me!')
-    const foo = asyncUtil(() => {
+    const foo = handler(() => {
       throw error
     })
     expect(foo).to.throw(error)
@@ -23,7 +23,7 @@ describe('asyncUtil', () => {
   it('should call next with the error when an async function passed into it throws', async () => {
     const error = new Error('catch me!')
     const next = sinon.spy();
-    const foo = asyncUtil(async (req, res, next) => {
+    const foo = handler(async (req, res, next) => {
       throw error
     })
 
@@ -33,7 +33,7 @@ describe('asyncUtil', () => {
 
   it('should call next with the arguments when an async function passed into it calls next', async () => {
     const next = sinon.spy()
-    const foo = asyncUtil(async (req, res, next) => {
+    const foo = handler(async (req, res, next) => {
       next('test')
     })
 
@@ -44,7 +44,7 @@ describe('asyncUtil', () => {
   it('should provide additional arguments to the middleware', async () => {
     const next = sinon.spy()
     const id = '1';
-    const foo = asyncUtil(async (req, res, next, id) => {
+    const foo = handler(async (req, res, next, id) => {
       return id;
     })
 
@@ -54,7 +54,7 @@ describe('asyncUtil', () => {
 
   it('should accept a non-async function', async () => {
     const next = sinon.spy()
-    const foo = asyncUtil((req, res, next) => {
+    const foo = handler((req, res, next) => {
       next('test')
     })
 
@@ -65,7 +65,7 @@ describe('asyncUtil', () => {
   it('should accept a non-async function erroring', async () => {
     const error = new Error('catch me!')
     const next = sinon.spy();
-    const foo = asyncUtil((req, res, next) => {
+    const foo = handler((req, res, next) => {
       next(error)
     })
 
@@ -89,7 +89,7 @@ describe('asyncUtil', () => {
 
     // test the actual library feature
     const next = sinon.spy()
-    const catchingThenable = asyncUtil(_ => thenable)(null, null, next)
+    const catchingThenable = handler(_ => thenable)(null, null, next)
     await registeringThenable
     expect(thenable.then).to.have.been.called
     expect(next).not.to.have.been.called
