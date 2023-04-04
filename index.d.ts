@@ -1,12 +1,5 @@
 import { ErrorRequestHandler } from 'express';
 
-export declare type MaestroParameters = {
-  P: ParamsDictionary,
-  ResBody : any,
-  ReqBody : any,
-  ReqQuery : Query,
-}
-
 export declare type ErrorConstructor<T extends unknown[]> = new (...args: T) => ErrorRequestHandler;
 
 export declare type Callback = (...args: any[]) => void;
