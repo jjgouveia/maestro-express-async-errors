@@ -6,12 +6,12 @@ export type ErrorConstructor<T extends unknown[]> = new (...args: T) => ErrorReq
 export type Callback = (...args: any[]) => Promise<void> | void;
 
 export interface Maestro {
-  (callback: Callback): Callback;
-  from(constructor: ErrorConstructor<[]>, callback: Callback): Callback;
+  (middleware: Callback): Callback;
+  from(constructor: ErrorConstructor<[]>, middleware: Callback): Callback;
   all(callbacks: Callback[]): Callback[];
 }
 
-const maestro: Maestro = function (callback) {
+const maestro: Maestro = function opera(middleware) {
   return async function orchestra(...args: any[]): Promise<void> {
     const next = args.slice(-1)[0] as NextFunction;
 
@@ -22,28 +22,28 @@ const maestro: Maestro = function (callback) {
     }
 
     try {
-      await callback(...args); // eslint-disable-line
+      await middleware(...args); // eslint-disable-line
     } catch (err) {
       next(err);
     }
   };
 };
 
-maestro.from = function from(constructor, callback) {
+maestro.from = function from(constructor, middleware) {
   return function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
     if (!(err instanceof constructor)) {
       next(err);
       return;
     }
 
-    callback(err, req, res, next);
+    middleware(err, req, res, next);
   };
 };
 
 maestro.all = function all(callbacks) {
   const result: Callback[] = [];
-  callbacks.forEach((callback) => {
-    result.push(maestro(callback));
+  callbacks.forEach((middleware) => {
+    result.push(maestro(middleware));
   });
   return result;
 };
