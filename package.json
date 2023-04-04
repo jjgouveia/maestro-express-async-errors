@@ -1,7 +1,7 @@
 {
   "name": "maestro-express-async-errors",
   "version": "1.0.0",
-  "description": "An Typescripted express error handler for async functions",
+  "description": "An fully Typescripted express error handler for async functions",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
@@ -28,7 +28,6 @@
     "@types/sinon": "^10.0.13",
     "@types/sinon-chai": "^3.2.9",
     "chai": "^4.3.4",
-    "mocha": "^9.1.3",
     "sinon": "^11.1.2",
     "sinon-chai": "^3.7.0",
     "tsup": "^6.7.0",
