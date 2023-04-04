@@ -1,5 +1,4 @@
-import { RequestHandler, Response } from 'express';
-import { ParamsDictionary, Query } from 'express-serve-static-core';
+import { ErrorRequestHandler } from 'express';
 
 export declare type MaestroParameters = {
   P: ParamsDictionary,
@@ -8,15 +7,13 @@ export declare type MaestroParameters = {
   ReqQuery : Query,
 }
 
-export declare type Handler = (err: Error, req: Request, res: Response, next: NextFunction) => Promise<void> | void;
+export declare type ErrorConstructor<T extends unknown[]> = new (...args: T) => ErrorRequestHandler;
 
-export declare type ErrorConstructor = {
-  new  (...args: Parameters<RequestHandler<MaestroParameters>>): Error;
-}
-export declare interface Maestro {
-    (opera: Handler): Handler;
-    from(constructor: ErrorConstructor, opera: Handler): Handler;
-    all (callbacks: Handler[]): Handler[];
+export declare type Callback = (...args: any[]) => void;
+export interface Maestro {
+  (middleware: Callback): Callback;
+  from(constructor: ErrorConstructor<[]>, middleware: Callback): Callback;
+  all(callbacks: Callback[]): Callback[];
 }
 
 
