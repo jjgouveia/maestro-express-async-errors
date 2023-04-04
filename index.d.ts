@@ -1,16 +1,27 @@
-import express = require('express');
-import core = require('express-serve-static-core');
+import { RequestHandler, Response } from 'express';
+import { ParamsDictionary, Query } from 'express-serve-static-core';
 
-declare function expressErrorsCompose<
-  P = core.ParamsDictionary,
-  ResBody = any,
-  ReqBody = any,
-  ReqQuery = core.Query,
->(handler: (...args: Parameters<express.RequestHandler<P, ResBody, ReqBody, ReqQuery>>) => express.Response | Promise<express.Response>):
-  express.RequestHandler<P, ResBody, ReqBody, ReqQuery>;
-
-declare namespace expressErrorsCompose {
-
+export declare type MaestroParameters = {
+  P: ParamsDictionary,
+  ResBody : any,
+  ReqBody : any,
+  ReqQuery : Query,
 }
 
-export = expressErrorsCompose;
+export declare type Handler = (err: Error, req: Request, res: Response, next: NextFunction) => Promise<void> | void;
+
+export declare type ErrorConstructor = {
+  new  (...args: Parameters<RequestHandler<MaestroParameters>>): Error;
+}
+export declare interface Maestro {
+    (opera: Handler): Handler;
+    from(constructor: ErrorConstructor, opera: Handler): Handler;
+    all (callbacks: Handler[]): Handler[];
+}
+
+
+declare const maestro: Maestro;
+export default maestro;
+
+
+

@@ -1,27 +1,27 @@
-Simple middleware for handling exceptions inside of async express routes and passing them to your express error handlers.
+A simple middleware for handling exceptions inside of async express routes and passing them to your express error handlers based on "Express Async Handler".
 
 ### Installation:
 
 ```
-npm install --save express-async-handler
+npm install --save maestro-express-async-errors
 ```
 or
 ```
-yarn add express-async-handler
+yarn add maestro-express-async-errors (soon)
 ```
 
 ### Usage:
 
 ```javascript
-const asyncHandler = require('express-async-handler')
+const maestro = require('maestro-express-async-errors')
 
-express.get('/', asyncHandler(async (req, res, next) => {
+express.get('/', maestro(async (req, res, next) => {
 	const bar = await foo.findAll();
 	res.send(bar)
 }))
 ```
 
-Without express-async-handler
+Without maestro-express-async-errors
 
 ```javascript
 express.get('/',(req, res, next) => {
@@ -36,5 +36,5 @@ express.get('/',(req, res, next) => {
 #### Import in Typescript:
 
 ```javascript
-import asyncHandler from "express-async-handler"
+import maestro from "maestro-express-async-errors"
 ```

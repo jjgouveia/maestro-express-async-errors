@@ -1,1 +1,9 @@
+coverage
 node_modules
+*.log
+.DS_Store
+.node_repl_history
+.nyc_output
+npm-debug.log*
+dist/
+test/
