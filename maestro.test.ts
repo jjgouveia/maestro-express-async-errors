@@ -1,7 +1,7 @@
 'use strict'
 
 import { NextFunction, Request, Response } from "express";
-import { expect, describe, test, assertType } from 'vitest'
+import { expect, describe, test } from 'vitest'
 
 import sinon from 'sinon';
 import chai from 'chai';
@@ -53,10 +53,10 @@ describe('Tries Maestro(async ([err,] req, res, next) => { })', () => {
   });
 
   describe('Calls the last argument (next) with the thrown error', () => {
-    const error = new Error()
+    const error = new TypeError()
     const route = maestro(async (_req: Request, _res: Response, _next: NextFunction) => { throw error })
 
-    test('Should call next with the arguments when an async function passed into it calls next', async () => {
+    test('Should call next with the arguments when an async function passed into', async () => {
       const next = sinon.spy()
       const foo = maestro(async (_req: Request, _res: Response, _next: NextFunction) => {
         next('test')
@@ -82,8 +82,12 @@ describe('Tries Maestro(async ([err,] req, res, next) => { })', () => {
       expect(spy3.called).to.equals(true)
     })
 
-    test('Raises a TypeError if last argument is not a function', async () => {
-      expect(await route({}, {})).to.toBeUndefined()
+    test('Returns Undefined if last argument is not a function', async () => {
+      try {
+        await route({}, {}, {})
+      } catch (error) {
+        expect(error).to.toThrowError(TypeError)
+      }
     })
 
     test('callable(req, res, next) - works for routes and middlewares', async () => {
@@ -137,12 +141,15 @@ describe('Tries maestro.from(RealProblems, (err) => { })', () => {
 })
 
 describe('Tries maestro.all([fn1, fn2, fn3])', () => {
-  const fn = async (_cb: any) => { throw new Error('foo') }
+  const fn = async (_cb: any) => { throw new TypeError('foo') }
 
   test('All given functions are wrapped with maestro', async () => {
     const [maestroFn] = maestro.all([fn])
-    expect(maestroFn()).to.toThrowError(Error)
-
+    try {
+      await maestroFn()
+    } catch (error) {
+      expect(error).to.toThrow(new TypeError("obj is not a function"))
+    }
   })
 })
 

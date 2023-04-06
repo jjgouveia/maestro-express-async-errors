@@ -36,7 +36,7 @@
   "engines": {
     "node": ">=7.6.0"
   },
-  "types": ".dist/index.d.ts",
+  "types": "./dist/index.d.ts",
   "bugs": {
     "url": "https://github.com/jjgouveia/maestro-express-async-errors/issues"
   },
