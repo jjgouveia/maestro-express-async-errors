@@ -6,12 +6,14 @@ import { ParsedQs } from 'qs';
 export type ErrorConstructor<T extends unknown[]> = new (...args: T) => ErrorRequestHandler;
 
 
-type Vo = {
-  err: Error, req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>, next: NextFunction
+type MaestroArgs = {
+  err: Error,
+  req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>>,
+  next: NextFunction
 }
 
-export type Callback = (...args: Vo[]) => Promise<void> | void;
-
+export type Callback = (...args: MaestroArgs[]) => Promise<void> | void;
 
 export interface Maestro {
   (middleware: Callback): Callback;
@@ -21,7 +23,7 @@ export interface Maestro {
 
 // Core function
 const maestro = function opera(middleware: Callback) {
-  return async function orchestra(...args: any[]): Promise<void> {
+  return async function orchestra(...args: MaestroArgs[]): Promise<void> {
     const fnReturn = middleware(...args)
   const next = args[args.length-1]
 
