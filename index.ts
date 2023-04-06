@@ -5,7 +5,13 @@ import { ParsedQs } from 'qs';
 
 export type ErrorConstructor<T extends unknown[]> = new (...args: T) => ErrorRequestHandler;
 
-export type Callback = (...args: any[]) => Promise<void> | void;
+
+type Vo = {
+  err: Error, req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>, next: NextFunction
+}
+
+export type Callback = (...args: Vo[]) => Promise<void> | void;
+
 
 export interface Maestro {
   (middleware: Callback): Callback;
