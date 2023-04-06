@@ -6,7 +6,7 @@ import { expect, describe, test } from 'vitest'
 import sinon from 'sinon';
 import chai from 'chai';
 import sinonChai from 'sinon-chai';
-import maestro from './dist/index.js';
+import maestro from '../dist/index.js';
 
 chai.use(sinonChai)
 chai.should()

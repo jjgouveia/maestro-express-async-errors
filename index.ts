@@ -13,6 +13,7 @@ export interface Maestro {
   all(callbacks: Callback[]): Callback[];
 }
 
+// Core function
 const maestro = function opera(middleware: Callback) {
   return async function orchestra(...args: any[]): Promise<void> {
     const fnReturn = middleware(...args)
