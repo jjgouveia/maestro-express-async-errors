@@ -37,7 +37,7 @@ maestro.from = function from(constructor: any, middleware: (arg0: Error, arg1: R
   };
 };
 
-maestro.all = function all(callbacks: any[]) {
+maestro.all = function all(callbacks: Callback[]) {
   const result: Callback[] = [];
   callbacks.forEach((callback) => {
     result.push(maestro(callback));
