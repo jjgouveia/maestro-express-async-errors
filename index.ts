@@ -19,10 +19,14 @@ const maestro = function opera(middleware: Callback) {
     const fnReturn = middleware(...args)
   const next = args[args.length-1]
 
+  if (typeof next !== 'function') {
+    throw new TypeError("Next is not a function")
+  }
+
   try {
     return Promise.resolve(fnReturn).catch(next)
-  } catch (error) {
-    throw new TypeError("Next is not a function")
+  } catch (err) {
+    throw new Error("Middleware must be a function")
   }
 };
 }

@@ -53,7 +53,7 @@ describe('Tries Maestro(async ([err,] req, res, next) => { })', () => {
   });
 
   describe('Calls the last argument (next) with the thrown error', () => {
-    const error = new TypeError()
+    const error = new TypeError("Next is not a function")
     const route = maestro(async (_req: Request, _res: Response, _next: NextFunction) => { throw error })
 
     it('Should call next with the arguments when an async function passed into', async () => {
@@ -82,11 +82,11 @@ describe('Tries Maestro(async ([err,] req, res, next) => { })', () => {
       expect(spy3.called).to.equals(true)
     })
 
-    it('Returns Undefined if last argument is not a function', async () => {
+    it('Raises a TypeError if next args it\'s not a function', async () => {
       try {
         await route({}, {}, {})
       } catch (error) {
-        expect(error).to.deep.equal(new TypeError())
+        expect(error).to.deep.equal(new TypeError("Next is not a function"))
       }
     })
 
@@ -141,14 +141,14 @@ describe('Tries maestro.from(RealProblems, (err) => { })', () => {
 })
 
 describe('Tries maestro.all([fn1, fn2, fn3])', () => {
-  const fn = async (_cb: any) => { throw new TypeError('foo') }
+  const fn = async (_cb: any) => { throw new TypeError() }
 
   it('All given functions are wrapped with maestro', async () => {
     const [maestroFn] = maestro.all([fn])
     try {
       await maestroFn()
     } catch (error) {
-      expect(error).to.deep.equal(new TypeError('foo'))
+      expect(error).to.deep.equal(new TypeError('Next is not a function'))
     }
   })
 })
