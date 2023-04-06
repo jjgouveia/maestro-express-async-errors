@@ -26,7 +26,7 @@ const maestro = function opera(middleware: Callback) {
   try {
     return Promise.resolve(fnReturn).catch(next)
   } catch (err) {
-    throw new Error("Middleware must be a function")
+    throw new Error("No recognized error")
   }
 };
 }
