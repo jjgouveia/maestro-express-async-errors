@@ -1,7 +1,7 @@
 {
   "name": "maestro-express-async-errors",
   "version": "1.0.0",
-  "description": "An fully Typescripted express error handler for async functions",
+  "description": "A simple an secure layer of code for async middlewares.",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
