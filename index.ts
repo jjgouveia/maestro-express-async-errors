@@ -39,7 +39,10 @@ const maestro = function opera(middleware: Callback) {
 };
 }
 
-maestro.from = function from(constructor: any, middleware: (arg0: Error, arg1: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, arg2: Response<any, Record<string, any>>, arg3: NextFunction) => void) {
+maestro.from = function from(constructor: any, middleware: (arg0: Error,
+  arg1: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>,
+  arg2: Response<any, Record<string, any>>,
+  arg3: NextFunction) => void) {
   return function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
     if (!(err instanceof constructor)) {
       next(err);
@@ -50,17 +53,20 @@ maestro.from = function from(constructor: any, middleware: (arg0: Error, arg1: R
   };
 };
 
-maestro.all = function all(callbacks: Callback[]) {
-  const result: Callback[] = [];
-  callbacks.forEach((callback) => {
-    result.push(maestro(callback));
-  });
-  return result;
-};
+// maestro.all = function all(callbacks: Callback[]) {
+//   const result: Callback[] = [];
+//   callbacks.forEach((callback) => {
+//     result.push(maestro(callback));
+//   });
+//   return result;
+// };
+
+maestro.all = function all(callbacks: any) {
+  return callbacks.map(maestro)
+}
 
 Object.freeze(maestro);
 Object.freeze(maestro.from);
 Object.freeze(maestro.all);
 
 module.exports = maestro;
-
