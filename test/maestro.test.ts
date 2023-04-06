@@ -1,7 +1,7 @@
 'use strict'
 
 import { NextFunction, Request, Response } from "express";
-import { expect, describe, test } from 'vitest'
+import { expect } from 'chai'
 
 import sinon from 'sinon';
 import chai from 'chai';
@@ -16,11 +16,11 @@ describe('Tries Maestro(async ([err,] req, res, next) => { })', () => {
 
   describe("Basic functionality", () => {
 
-    test('Maestro is a function', () => {
+    it('Maestro is a function', () => {
       expect(maestro).to.be.a('function')
     });
 
-    test('Should call next with the error when an async function passed into it throws', async () => {
+    it('Should call next with the error when an async function passed into it throws', async () => {
       const error = new Error('Oh! You catch me!')
       const foo = maestro(async (_req: Request, _res: Response, _next: NextFunction) => {
         throw error
@@ -30,7 +30,7 @@ describe('Tries Maestro(async ([err,] req, res, next) => { })', () => {
       expect(next).to.have.been.calledWith(error)
     });
 
-    test('Should call next with the error when an non-async function passed into it throws', async () => {
+    it('Should call next with the error when an non-async function passed into it throws', async () => {
       const error = new Error('Oh! You catch me!')
       const foo = maestro((_req: Request, _res: Response, _next: NextFunction) => {
         next(error)
@@ -40,7 +40,7 @@ describe('Tries Maestro(async ([err,] req, res, next) => { })', () => {
       expect(next).to.have.been.calledWith(error)
     })
 
-    test('Should call next when a non-async function passed', async () => {
+    it('Should call next when a non-async function passed', async () => {
       const next = sinon.spy()
       const foo = maestro((_req: Request, _res: Response, _next: NextFunction) => {
         next('test')
@@ -56,7 +56,7 @@ describe('Tries Maestro(async ([err,] req, res, next) => { })', () => {
     const error = new TypeError()
     const route = maestro(async (_req: Request, _res: Response, _next: NextFunction) => { throw error })
 
-    test('Should call next with the arguments when an async function passed into', async () => {
+    it('Should call next with the arguments when an async function passed into', async () => {
       const next = sinon.spy()
       const foo = maestro(async (_req: Request, _res: Response, _next: NextFunction) => {
         next('test')
@@ -66,7 +66,7 @@ describe('Tries Maestro(async ([err,] req, res, next) => { })', () => {
       expect(next).to.have.been.calledWith('test')
     })
 
-    test('All arguments are been passed to the callback', async () => {
+    it('All arguments are been passed to the callback', async () => {
       const spy1 = sinon.spy()
       const spy2 = sinon.spy()
       const spy3 = sinon.spy()
@@ -82,22 +82,22 @@ describe('Tries Maestro(async ([err,] req, res, next) => { })', () => {
       expect(spy3.called).to.equals(true)
     })
 
-    test('Returns Undefined if last argument is not a function', async () => {
+    it('Returns Undefined if last argument is not a function', async () => {
       try {
         await route({}, {}, {})
       } catch (error) {
-        expect(error).to.toThrowError(TypeError)
+        expect(error).to.deep.equal(new TypeError())
       }
     })
 
-    test('callable(req, res, next) - works for routes and middlewares', async () => {
+    it('callable(req, res, next) - works for routes and middlewares', async () => {
       const spy = sinon.spy()
 
       await route({}, {}, spy)
       expect(spy.called).to.equals(true)
     })
 
-    test('callable(err, req, res, next) - works for error handler middlewares', async () => {
+    it('callable(err, req, res, next) - works for error handler middlewares', async () => {
       const spy = sinon.spy()
 
       await route({}, {}, {}, spy)
@@ -114,7 +114,7 @@ describe('Tries maestro.from(RealProblems, (err) => { })', () => {
   const req = {}
   const res = {}
 
-  test('Handles the error when error is instance of given constructor', () => {
+  it('Handles the error when error is instance of given constructor', () => {
     const matchedHandler = (err: any) => {
       expect(err).to.be.instanceOf(RealProblems)
     }
@@ -127,7 +127,7 @@ describe('Tries maestro.from(RealProblems, (err) => { })', () => {
     maestro.from(Error, matchedHandler)(new RealProblems(), req, res, next)
   })
 
-  test('It call `next` function if error is not an instance of given constructor', () => {
+  it('It call `next` function if error is not an instance of given constructor', () => {
     const matchedHandler = (_err: any) => {
       throw new Error('Not supposed to call this function')
     }
@@ -143,21 +143,13 @@ describe('Tries maestro.from(RealProblems, (err) => { })', () => {
 describe('Tries maestro.all([fn1, fn2, fn3])', () => {
   const fn = async (_cb: any) => { throw new TypeError('foo') }
 
-  test('All given functions are wrapped with maestro', async () => {
+  it('All given functions are wrapped with maestro', async () => {
     const [maestroFn] = maestro.all([fn])
     try {
       await maestroFn()
     } catch (error) {
-      expect(error).to.toThrow(new TypeError("obj is not a function"))
+      expect(error).to.deep.equal(new TypeError('foo'))
     }
   })
 })
-
-
-
-
-
-
-
-
 
