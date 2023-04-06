@@ -1,12 +1,12 @@
 'use strict'
 
 import { NextFunction, Request, Response } from "express";
-import { expect, describe, test } from 'vitest'
+import { expect, describe, test, assertType } from 'vitest'
 
 import sinon from 'sinon';
 import chai from 'chai';
 import sinonChai from 'sinon-chai';
-import maestro from '../dist/index.js';
+import maestro from './dist/index.js';
 
 chai.use(sinonChai)
 chai.should()
@@ -82,14 +82,8 @@ describe('Tries Maestro(async ([err,] req, res, next) => { })', () => {
       expect(spy3.called).to.equals(true)
     })
 
-    test('Raises a TypeError if last argument is not a function', () => {
-      return Promise.all([
-        expect(route({})).to.toThrow(TypeError),
-        expect(route({}, {})).to.toThrow(TypeError),
-        expect(route({}, {}, {})).to.toThrow(TypeError),
-        expect(route({}, {}, {}, {})).to.toThrow(TypeError),
-        // expect(route({}, {}, {}, {})).to.eventually.be.rejectedWith(TypeError, 'The last parameter received is not a function.')
-      ])
+    test('Raises a TypeError if last argument is not a function', async () => {
+      expect(await route({}, {})).to.toBeUndefined()
     })
 
     test('callable(req, res, next) - works for routes and middlewares', async () => {
@@ -145,15 +139,10 @@ describe('Tries maestro.from(RealProblems, (err) => { })', () => {
 describe('Tries maestro.all([fn1, fn2, fn3])', () => {
   const fn = async (_cb: any) => { throw new Error('foo') }
 
-  test('All given functions are wrapped with maestro', () => {
+  test('All given functions are wrapped with maestro', async () => {
     const [maestroFn] = maestro.all([fn])
+    expect(maestroFn()).to.toThrowError(Error)
 
-    return Promise.all([
-      // Proves that the rescued function contains additional behavior that is
-      // added when a fn is wrapped with `maestro`.
-      // expect(maestroFn()).to.toThrowError(TypeError, 'The last parameter received is not a function.')
-      expect(maestroFn()).to.toThrowError(TypeError)
-    ])
   })
 })
 

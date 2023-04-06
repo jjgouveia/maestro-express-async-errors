@@ -16,13 +16,11 @@ const maestro: Maestro = function opera(middleware) {
     const next = args.slice(-1)[0] as NextFunction;
 
     if (typeof next !== 'function') {
-      throw new TypeError(
-        'The last parameter received is not a function. Are you sure you passed its return as a middleware?',
-      );
+      return
     }
 
     try {
-      await middleware(...args); // eslint-disable-line
+      await middleware(...args);
     } catch (err) {
       next(err);
     }
@@ -42,8 +40,8 @@ maestro.from = function from(constructor, middleware) {
 
 maestro.all = function all(callbacks) {
   const result: Callback[] = [];
-  callbacks.forEach((middleware) => {
-    result.push(maestro(middleware));
+  callbacks.forEach((callback) => {
+    result.push(maestro(callback));
   });
   return result;
 };

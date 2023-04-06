@@ -8,7 +8,6 @@
     "url": "git+https://github.com/jjgouveia/maestro-express-async-errors.git"
   },
   "scripts": {
-    "test2": "mocha ./test/maestro.test.js",
     "test": "vitest",
     "build": "tsup index.ts"
   },
@@ -37,7 +36,7 @@
   "engines": {
     "node": ">=7.6.0"
   },
-  "types": "./index.d.ts",
+  "types": ".dist/index.d.ts",
   "bugs": {
     "url": "https://github.com/jjgouveia/maestro-express-async-errors/issues"
   },
