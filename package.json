@@ -1,6 +1,6 @@
 {
   "name": "maestro-express-async-errors",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A simple an secure layer of code for async middlewares.",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
@@ -14,7 +14,7 @@
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "lint": "tsc",
     "ci": "npm run lint && npm run build && npm run test"
-    },
+  },
   "keywords": [
     "express",
     "expressjs",
