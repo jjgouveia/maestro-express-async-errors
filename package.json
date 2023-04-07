@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "mocha --require ts-node/register test/**/*.ts",
-    "build": "tsup index.ts"
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "lint": "tsc"
   },
   "keywords": [
     "express",

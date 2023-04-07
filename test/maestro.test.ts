@@ -1,11 +1,11 @@
 'use strict'
 
 import { NextFunction, Request, Response } from "express";
-import { assert, expect } from 'chai'
+import { expect } from 'chai'
 import sinon from 'sinon';
 import chai from 'chai';
 import sinonChai from 'sinon-chai';
-import maestro from '../dist/index.js';
+import { maestro } from '../dist/index.js';
 
 chai.use(sinonChai)
 chai.should()
@@ -116,8 +116,8 @@ describe('Try maestro.from(RealProblems, (err) => { }) :', () => {
   class NonRealProblems { } // NonRealProblems is not a subclass of Error,
   // that is, for example, what you get when you are anxious.
 
-  const req = {}
-  const res = {}
+  const req = {} as any
+  const res = {} as any
 
   it('Handles the error when error is instance of given constructor.', () => {
     const matchedHandler = (err: any) => {
@@ -141,7 +141,7 @@ describe('Try maestro.from(RealProblems, (err) => { }) :', () => {
       expect(err).to.be.instanceOf(NonRealProblems)
     }
 
-    maestro.from(RealProblems, matchedHandler)(new NonRealProblems(), req, res, next)
+    maestro.from(RealProblems, matchedHandler)(new NonRealProblems() as Error, req, res, next)
   })
 })
 

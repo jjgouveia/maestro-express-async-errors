@@ -13,7 +13,7 @@ type MaestroArgs = {
   next: NextFunction
 }
 
-export type Callback = (...args: MaestroArgs[]) => Promise<void> | void;
+export type Callback = (...args: any[]) => Promise<void> | void;
 
 export interface Maestro {
   (middleware: Callback): Callback;
@@ -23,7 +23,7 @@ export interface Maestro {
 
 // Core function
 const maestro = function opera(middleware: Callback) {
-  return async function orchestra(...args: MaestroArgs[]): Promise<void> {
+  return async function orchestra(...args: any[]): Promise<void> {
     const fnReturn = middleware(...args)
   const next = args[args.length-1]
 
@@ -53,13 +53,6 @@ maestro.from = function from(constructor: any, middleware: (arg0: Error,
   };
 };
 
-// maestro.all = function all(callbacks: Callback[]) {
-//   const result: Callback[] = [];
-//   callbacks.forEach((callback) => {
-//     result.push(maestro(callback));
-//   });
-//   return result;
-// };
 
 maestro.all = function all(callbacks: any) {
   return callbacks.map(maestro)
@@ -69,4 +62,4 @@ Object.freeze(maestro);
 Object.freeze(maestro.from);
 Object.freeze(maestro.all);
 
-module.exports = maestro;
+export { maestro }
