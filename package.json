@@ -1,12 +1,14 @@
 {
   "name": "maestro-express-async-errors",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "A simple an secure layer of code for async middlewares.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "module": "./dist/index.mjs",
   "files": [
-    "dist"
+    "dist",
+    "test",
+    "index.ts"
   ],
   "repository": {
     "type": "git",
