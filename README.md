@@ -1,6 +1,6 @@
 ![node-current](https://img.shields.io/node/v/maestro-express-async-errors)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-[![Node.js CI](https://github.com/jjgouveia/maestro-express-async-errors/actions/workflows/node.js.yml/badge.svg)](https://github.com/jjgouveia/maestro-express-async-errors/actions/workflows/node.js.yml)
+[![CI RELEASE](https://github.com/jjgouveia/maestro-express-async-errors/actions/workflows/ci.yml/badge.svg)](https://github.com/jjgouveia/maestro-express-async-errors/actions/workflows/ci.yml)
 # Maestro for Express Async Errors
 ### 🏆 The async/await heaven!
 <hr>
