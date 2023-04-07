@@ -12,9 +12,8 @@
   "scripts": {
     "test": "mocha --require ts-node/register test/**/*.ts",
     "build": "tsup src/index.ts --format cjs,esm --dts",
-    "lint": "tsc",
-    "ci": "npm install && npm run lint && npm run test && npm run build"
-  },
+    "lint": "tsc"
+    },
   "keywords": [
     "express",
     "expressjs",
