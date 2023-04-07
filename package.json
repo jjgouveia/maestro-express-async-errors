@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "A simple an secure layer of code for async middlewares.",
   "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "module": "dist/index.mjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jjgouveia/maestro-express-async-errors.git"
@@ -11,7 +13,7 @@
     "test": "mocha --require ts-node/register test/**/*.ts",
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "lint": "tsc",
-    "ci": "npm run lint && npm run test && npm run build"
+    "ci": "npm run lint && npm run build && npm run test"
   },
   "keywords": [
     "express",
@@ -40,7 +42,6 @@
   "engines": {
     "node": ">=7.6.0"
   },
-  "types": "./dist/index.d.ts",
   "bugs": {
     "url": "https://github.com/jjgouveia/maestro-express-async-errors/issues"
   },
