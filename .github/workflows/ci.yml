@@ -4,17 +4,15 @@
 name: CI RELEASE
 
 on:
-  push:
-    branches: ["master"]
-  # release:
-  #   types: [created]
+  release:
+    types: [created]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: [16.x]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3

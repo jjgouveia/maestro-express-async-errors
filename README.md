@@ -1,6 +1,7 @@
 ![node-current](https://img.shields.io/node/v/maestro-express-async-errors)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 [![CI RELEASE](https://github.com/jjgouveia/maestro-express-async-errors/actions/workflows/ci.yml/badge.svg)](https://github.com/jjgouveia/maestro-express-async-errors/actions/workflows/ci.yml)
+![Downloads](https://img.shields.io/npm/dy/maestro-express-async-errors)
 # Maestro for Express Async Errors
 ### 🏆 The async/await heaven!
 <hr>
@@ -27,7 +28,8 @@ yarn add maestro-express-async-errors
 **With maestro:**
 
 ```javascript
-const maestro = require('maestro-express-async-errors')
+const { maestro } = require('maestro-express-async-errors');
+
 
 express.get('/', maestro(async (req, res, next) => {
 	const bar = await foo.findAll();
@@ -53,7 +55,7 @@ express.get('/',(req, res, next) => {
 *  `maestro` insures thrown errors are passed to `next` callback:
 
 ```js
-const maestro = require('maestro-express-async-errors')
+const { maestro } = require('maestro-express-async-errors');
 
 app.get('/:id', maestro(async (req, res, next) => {
     const user = await repository.getById(req.params.id)
@@ -106,7 +108,7 @@ app.post('/products', [
 #### Import in Typescript:
 
 ```javascript
-import maestro from "maestro-express-async-errors"
+import { maestro } from "maestro-express-async-errors"
 ```
 
 <br>
