@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: 16.x
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -57,4 +57,4 @@ jobs:
     - run: npm run semantic-release
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.MAESTRO }}
