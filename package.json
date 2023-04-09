@@ -19,8 +19,9 @@
     "build": "tsup index.ts --format cjs,esm --dts --out-dir dist",
     "lint": "tsc",
     "ci": "npm run lint && npm run build && npm run test",
-    "semantic-release": "semantic-release --branches main",
-    "commit": "git-cz"
+    "semantic-release": "semantic-release --branches master",
+    "commit": "git-cz",
+    "acp": "git add . && npm run commit && git push"
   },
   "keywords": [
     "express",
