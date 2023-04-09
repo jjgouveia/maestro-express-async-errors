@@ -19,7 +19,8 @@
     "build": "tsup index.ts --format cjs,esm --dts --out-dir dist",
     "lint": "tsc",
     "ci": "npm run lint && npm run build && npm run test",
-    "semantic-release": "semantic-release --branches main"
+    "semantic-release": "semantic-release --branches main",
+    "commit": "git-cz"
   },
   "keywords": [
     "express",
@@ -39,6 +40,7 @@
     "@types/sinon-chai": "^3.2.9",
     "chai": "^4.3.4",
     "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
     "mocha": "^10.2.0",
     "semantic-release": "^21.0.1",
     "sinon": "^11.1.2",
@@ -53,5 +55,10 @@
   "bugs": {
     "url": "https://github.com/jjgouveia/maestro-express-async-errors/issues"
   },
-  "homepage": "https://github.com/jjgouveia/maestro-express-async-errors/#readme"
+  "homepage": "https://github.com/jjgouveia/maestro-express-async-errors/#readme",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
 }
