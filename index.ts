@@ -51,7 +51,7 @@ maestro.from = function from(constructor: any, middleware: (arg0: Error,
 };
 
 
-maestro.all = function all(callbacks: any) {
+maestro.all = function all(callbacks: Callback[]) {
   return callbacks.map(maestro)
 }
 

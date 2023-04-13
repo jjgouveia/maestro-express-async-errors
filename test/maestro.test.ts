@@ -1,6 +1,5 @@
 'use strict'
 
-import { NextFunction, Request, Response } from "express";
 import { expect } from 'chai'
 import sinon from 'sinon';
 import chai from 'chai';
@@ -55,6 +54,40 @@ describe('Try maestro(async (req, res, next) => { next() or Error }) :', () => {
       await foo({}, {}, next)
       expect(next).to.have.been.calledWith('test')
     })
+
+    it('Thenables are not guaranteed to have a `catch` method. This test refers to this.', async () => {
+      const error: Error = Error('Wow!');
+      let thenable: any;
+      let triggerFailure: any;
+
+      const registeringThenable: Promise<void> = new Promise<void>((resolve) => {
+        thenable = {
+          then: sinon.spy((_success: any, fail: any) => {
+            triggerFailure = fail;
+            resolve();
+          }),
+        };
+      });
+
+      const next: sinon.SinonSpy = sinon.spy();
+      const catchingThenable: Promise<void> = maestro(() => thenable)(null, null, next);
+      await registeringThenable
+
+
+      expect(thenable.then).to.have.been.called;
+      expect(next).not.to.have.been.called;
+
+      triggerFailure(error);
+      await catchingThenable
+
+
+      try {
+        await catchingThenable;
+        expect(next).to.have.been.calledWith(error);
+      } catch (err) {
+        expect.fail(err as any);
+      }
+    });
   });
 
   describe('Should invoke `next` with the thrown error:', () => {
