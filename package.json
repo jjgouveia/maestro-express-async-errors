@@ -26,10 +26,12 @@
   },
   "keywords": [
     "express",
+    "async errors",
     "expressjs",
     "async",
     "error middleware",
     "await",
+    "async/await",
     "error",
     "handling"
   ],
