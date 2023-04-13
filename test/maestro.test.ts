@@ -73,13 +73,11 @@ describe('Try maestro(async (req, res, next) => { next() or Error }) :', () => {
       const catchingThenable: Promise<void> = maestro(() => thenable)(null, null, next);
       await registeringThenable
 
-
       expect(thenable.then).to.have.been.called;
       expect(next).not.to.have.been.called;
 
       triggerFailure(error);
       await catchingThenable
-
 
       try {
         await catchingThenable;
