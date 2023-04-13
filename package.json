@@ -16,8 +16,9 @@
   },
   "scripts": {
     "test": "mocha --require ts-node/register test/**/*.ts",
-    "build": "tsup index.ts --format cjs,esm --dts --out-dir dist",
+    "build": "rm -rf ./dist && tsup index.ts --format cjs,esm --dts --out-dir dist",
     "lint": "tsc",
+    "eslint": "eslint --ext .ts,.tsx .",
     "ci": "npm run lint && npm run build && npm run test",
     "semantic-release": "semantic-release --branches master",
     "commit": "git-cz",
@@ -39,6 +40,7 @@
     "@types/mocha": "^10.0.1",
     "@types/sinon": "^10.0.13",
     "@types/sinon-chai": "^3.2.9",
+    "@typescript-eslint/eslint-plugin": "^5.58.0",
     "chai": "^4.3.4",
     "commitizen": "^4.3.0",
     "cz-conventional-changelog": "^3.3.0",
@@ -48,7 +50,7 @@
     "sinon-chai": "^3.7.0",
     "tsup": "^6.7.0",
     "tsx": "^3.12.6",
-    "typescript": "^5.0.3"
+    "typescript": "^5.0.4"
   },
   "engines": {
     "node": ">=7.6.0"

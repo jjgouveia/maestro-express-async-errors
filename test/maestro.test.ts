@@ -28,7 +28,7 @@ describe('Try maestro(async (req, res, next) => { next() or Error }) :', () => {
 
     it('When an asynchronous function passed into it throws an error, it is expected that the calls next with that error.', async () => {
       const error = new Error('Oh! You catch me!')
-      const foo = maestro(async (_req: Request, _res: Response, _next: NextFunction) => {
+      const foo = maestro(async (_req: any, _res: any, _next: any) => {
         throw error
       })
 
@@ -38,7 +38,7 @@ describe('Try maestro(async (req, res, next) => { next() or Error }) :', () => {
 
     it('When a non-asynchronous function passed into it throws an error, it is expected that calls next with that error.', async () => {
       const error = new Error('Oh! You catch me!')
-      const foo = maestro((_req: Request, _res: Response, _next: NextFunction) => {
+      const foo = maestro((_req: any, _res: any, _next: any) => {
         next(error)
       })
 
@@ -48,7 +48,7 @@ describe('Try maestro(async (req, res, next) => { next() or Error }) :', () => {
 
     it('Should invoke `next` when passing a non-async function.', async () => {
       const next = sinon.spy()
-      const foo = maestro((_req: Request, _res: Response, _next: NextFunction) => {
+      const foo = maestro((_req: any, _res: any, _next: any) => {
         next('test')
       })
 
@@ -59,11 +59,11 @@ describe('Try maestro(async (req, res, next) => { next() or Error }) :', () => {
 
   describe('Should invoke `next` with the thrown error:', () => {
     const error = new TypeError("Next is not a function")
-    const route = maestro(async (_req: Request, _res: Response, _next: NextFunction) => { throw error })
+    const route = maestro(async (_req: any, _res: any, _next: any) => { throw error })
 
     it('If an async function is passed as an argument, the next function should be called with the provided arguments.', async () => {
       const next = sinon.spy()
-      const foo = maestro(async (_req: Request, _res: Response, _next: NextFunction) => {
+      const foo = maestro(async (_req: any, _res: any, _next: any) => {
         next('test')
       })
 
@@ -162,36 +162,37 @@ describe('Try maestro.all([...args]) :', () => {
   })
 
   it('Should return an array.', async () => {
-    const foo = maestro(async (_req: Request, _res: Response, _next: NextFunction) => {
+    const foo = maestro(async (_req: any, _res: any, _next: any) => {
       next('test')
     })
 
     expect(maestro.all([foo])).to.be.a('array')
   })
   it('Should return an array of functions', async () => {
-    const foo = maestro(async (_req: Request, _res: Response, _next: NextFunction) => {
+    const foo = maestro(async (_req: any, _res: any, _next: any) => {
       next('test')
     })
 
     expect(maestro.all([foo])[0]).to.be.a('function')
   })
   it('Should return an array of functions that returns a promise.', async () => {
-    const foo = maestro(async (_req: Request, _res: Response, _next: NextFunction) => {
+    const foo = maestro(async (_req: any, _res: any, _next: any) => {
       next('test')
     })
 
     expect(maestro.all([foo])[0]()).to.be.a('promise')
   })
   it('Should return an array of functions that returns a promise that calls next.', async () => {
-    const foo = maestro(async (_req: Request, _res: Response, _next: NextFunction) => {
+    const foo = maestro(async (_req: any, _res: any, _next: any) => {
       next('test')
     })
 
     await maestro.all([foo])[0](req, res, next)
     expect(next).to.have.been.calledWith('test')
   })
+
   it('Should return an array of functions that returns a promise that calls next with the error.', async () => {
-    const foo = maestro(async (_req: Request, _res: Response, _next: NextFunction) => {
+    const foo = maestro(async (_req: any, _res: any, _next: any) => {
       next(error)
     })
 

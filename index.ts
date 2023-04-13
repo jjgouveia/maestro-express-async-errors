@@ -1,11 +1,16 @@
-import { ErrorRequestHandler } from 'express';
+import { ErrorRequestHandler, RequestHandler } from 'express';
 import { Request, Response, NextFunction } from 'express';
-import { ParamsDictionary } from 'express-serve-static-core';
+import { ParamsDictionary, Query } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 
 export type ErrorConstructor<T extends unknown[]> = new (...args: T) => ErrorRequestHandler;
 
-export type Callback = (...args: any[]) => void;
+export type Callback<
+  P = ParamsDictionary,
+  ResBody = any,
+  ReqBody = any,
+  ReqQuery = Query,
+> = (...args: Parameters<RequestHandler<P, ResBody, ReqBody, ReqQuery>>) => void;
 
 export interface Maestro {
   (middleware: Callback): Callback;
@@ -13,22 +18,22 @@ export interface Maestro {
   all(callbacks: Callback[]): Callback[];
 }
 
-// Core function
+
 const maestro = function opera(middleware: Callback) {
   return async function orchestra(...args: any[]): Promise<void> {
-    const fnReturn = middleware(...args)
-  const next = args[args.length-1]
+    const fnReturn = middleware(...args as Parameters<RequestHandler>)
+    const next = args[args.length - 1]
 
-  if (typeof next !== 'function') {
-    throw new TypeError("Next is not a function")
-  }
+    if (typeof next !== 'function') {
+      throw new TypeError("Next is not a function")
+    }
 
-  try {
-    return Promise.resolve(fnReturn).catch(next)
-  } catch (err) {
-    throw new Error("No recognized error")
-  }
-};
+    try {
+      return Promise.resolve(fnReturn).catch(next)
+    } catch (err) {
+      throw new Error("No recognized error")
+    }
+  };
 }
 
 maestro.from = function from(constructor: any, middleware: (arg0: Error,
