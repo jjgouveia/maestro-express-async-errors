@@ -1,0 +1,71 @@
+{
+  "name": "maestro-express-async-errors",
+  "version": "1.2.8",
+  "description": "A simple an secure layer of code for async middlewares.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.mjs",
+  "files": [
+    "dist",
+    "test",
+    "index.ts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jjgouveia/maestro-express-async-errors.git"
+  },
+  "scripts": {
+    "test": "mocha --require ts-node/register test/**/*.ts",
+    "coverage": "nyc -r text -r json-summary mocha --require ts-node/register test/**/*.ts",
+    "build": "rm -rf ./dist && tsup index.ts --format cjs,esm --dts --out-dir dist",
+    "lint": "tsc",
+    "eslint": "eslint --ext .ts,.tsx .",
+    "ci": "npm run lint && npm run build && npm run test",
+    "semantic-release": "semantic-release --branches master",
+    "commit": "git-cz",
+    "acp": "git add . && npm run commit && git push"
+  },
+  "keywords": [
+    "express",
+    "async errors",
+    "expressjs",
+    "async",
+    "error middleware",
+    "await",
+    "async/await",
+    "error",
+    "handling"
+  ],
+  "author": "Jr Gouveia <gouvik.dev@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@types/express": "4.17.17",
+    "@types/mocha": "^10.0.1",
+    "@types/sinon": "^10.0.13",
+    "@types/sinon-chai": "^3.2.9",
+    "chai": "^4.3.4",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
+    "semantic-release": "^21.0.1",
+    "sinon": "^11.1.2",
+    "sinon-chai": "^3.7.0",
+    "tsup": "^6.7.0",
+    "tsx": "^3.12.6",
+    "typescript": "^5.0.4"
+  },
+  "engines": {
+    "node": ">=7.6.0"
+  },
+  "bugs": {
+    "url": "https://github.com/jjgouveia/maestro-express-async-errors/issues"
+  },
+  "homepage": "https://github.com/jjgouveia/maestro-express-async-errors/#readme",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
