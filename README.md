@@ -2,12 +2,12 @@
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 [![CI RELEASE](https://github.com/jjgouveia/maestro-express-async-errors/actions/workflows/ci.yml/badge.svg)](https://github.com/jjgouveia/maestro-express-async-errors/actions/workflows/ci.yml)
 ![Downloads](https://img.shields.io/npm/dy/maestro-express-async-errors)
-# 📌 Maestro for ExpressJS Async Errors 
+[![cov](https://jjgouveia.github.io/maestro-express-async-errors/badges/coverage.svg)](https://github.com/jjgouveia/maestro-express-async-errors/actions)
+# Maestro for ExpressJS Async Errors
 ### 🏆 The async/await heaven!
 <hr>
 
-## Maestro is a layer of code that acts as a wrapper, without any dependencies, for async middlewares. Its purpose is to ensure that all errors occurring in async operations are properly passed to your stack of error handlers. By doing so, Maestro helps to improve the readability and cleanliness of your code.
-
+## Maestro is a slightly layer of code that acts as a wrapper, without any dependencies, for async middlewares. Its purpose is to ensure that all errors occurring in async operations are properly passed to your stack of error handlers. By doing so, Maestro helps to improve the readability and cleanliness of your code.
 
 ### Installation:
 
@@ -116,8 +116,10 @@ import { maestro } from "maestro-express-async-errors"
 ## Test Cases
 
 ```txt
-> maestro-express-async-errors@1.0.0 test
+> maestro-express-async-errors@1.2.5 test
 > mocha --require ts-node/register test/**/*.ts
+
+
 
   Try maestro(async (req, res, next) => { next() or Error }) :
     Basic functionality:
@@ -127,6 +129,7 @@ import { maestro } from "maestro-express-async-errors"
       ✔ When an asynchronous function passed into it throws an error, it is expected that the calls next with that error.
       ✔ When a non-asynchronous function passed into it throws an error, it is expected that calls next with that error.
       ✔ Should invoke `next` when passing a non-async function.
+      ✔ Thenables are not guaranteed to have a `catch` method. This test refers to this.
     Should invoke `next` with the thrown error:
       ✔ If an async function is passed as an argument, the next function should be called with the provided arguments.
       ✔ Works like a charm if all arguments are passed to the callback function.
@@ -147,6 +150,6 @@ import { maestro } from "maestro-express-async-errors"
     ✔ Should return an array of functions that returns a promise that calls next with the error.
 
 
-  19 passing (109ms)
+  20 passing (75ms)
 ```
 
