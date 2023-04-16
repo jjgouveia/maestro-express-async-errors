@@ -1,0 +1,17 @@
+name: Coverage
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # Your original steps
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - name: Install
+        run: npm install
+      - name: Test and Coverage
+        run: npm run coverage
+
+      # Add this
+      - name: Update Coverage Badge
+        uses: we-cli/coverage-badge-action@main
