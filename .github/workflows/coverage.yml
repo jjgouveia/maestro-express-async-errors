@@ -10,6 +10,7 @@ jobs:
       - name: Install
         run: npm install
       - name: Test and Coverage
+        run: npm run build
         run: npm run coverage
 
       # Add this
