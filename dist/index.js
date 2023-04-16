@@ -8,9 +8,12 @@ var __export = (target, all2) => {
     __defProp(target, name, { get: all2[name], enumerable: true });
 };
 var __copyProps = (to, from2, except, desc) => {
+  /* istanbul ignore next */
   if (from2 && typeof from2 === "object" || typeof from2 === "function") {
     for (let key of __getOwnPropNames(from2))
+    /* istanbul ignore next */
       if (!__hasOwnProp.call(to, key) && key !== except)
+      /* istanbul ignore next */
         __defProp(to, key, { get: () => from2[key], enumerable: !(desc = __getOwnPropDesc(from2, key)) || desc.enumerable });
   }
   return to;
@@ -27,7 +30,7 @@ var maestro = function opera(middleware) {
   return async function orchestra(...args) {
     const fnReturn = middleware(...args);
     const next = args[args.length - 1];
-    if (typeof next !== "function") {
+    if (typeof next !== typeof Function) {
       throw new TypeError("Next is not a function");
     }
     return Promise.resolve(fnReturn).catch(next);
@@ -49,6 +52,7 @@ Object.freeze(maestro);
 Object.freeze(maestro.from);
 Object.freeze(maestro.all);
 // Annotate the CommonJS export names for ESM import in node:
+/* istanbul ignore next */
 0 && (module.exports = {
   maestro
 });

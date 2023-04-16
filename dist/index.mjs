@@ -3,7 +3,7 @@ var maestro = function opera(middleware) {
   return async function orchestra(...args) {
     const fnReturn = middleware(...args);
     const next = args[args.length - 1];
-    if (typeof next !== "function") {
+    if (typeof next !== typeof Function) {
       throw new TypeError("Next is not a function");
     }
     return Promise.resolve(fnReturn).catch(next);
