@@ -9,8 +9,6 @@ jobs:
       - uses: actions/setup-node@v3
       - name: Install
         run: npm install
-      - name: Build app
-        run: npm run build
       - name: Test and Coverage
         run: npm run coverage
 
