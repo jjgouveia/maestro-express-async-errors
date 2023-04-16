@@ -16,7 +16,7 @@
   },
   "scripts": {
     "test": "mocha --require ts-node/register test/**/*.ts",
-    "coverage": "nyc npm run test",
+    "coverage": "nyc report --reporter=lcov --reporter=text",
     "build": "rm -rf ./dist && tsup index.ts --format cjs,esm --dts --out-dir dist",
     "lint": "tsc",
     "eslint": "eslint --ext .ts,.tsx .",
