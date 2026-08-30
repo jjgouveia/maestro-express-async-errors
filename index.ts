@@ -29,13 +29,18 @@ export interface Maestro {
 }
 
 function opera(middleware: Callback): Callback {
-  return async function orchestra(...args: any[]): Promise<void> {
-    const fnReturn = middleware(...(args as Parameters<RequestHandler>));
+  return function orchestra(...args: any[]) {
     const next = args[args.length - 1];
     if (typeof next !== "function") {
       throw new TypeError("Next is not a function");
     }
-    return Promise.resolve(fnReturn).catch(next);
+    try {
+      return Promise.resolve(middleware(...(args as Parameters<RequestHandler>))).catch(
+        next
+      );
+    } catch (err) {
+      next(err);
+    }
   };
 }
 
