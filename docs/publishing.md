@@ -13,10 +13,16 @@ Este pacote publica no npm via **Trusted Publishing (OIDC)**. Não use `NPM_TOKE
 2. Confirmar que [`.github/workflows/release.yml`](../.github/workflows/release.yml) existe e tem:
    - `permissions.id-token: write`
    - `contents` / `issues` / `pull-requests` write
+   - **Node 24+** (npm CLI ≥ 11.5.1; Node 22 traz npm 10 e falha com `ENONPMTOKEN`)
+   - **semantic-release ≥ 25** (`@semantic-release/npm@13` com OIDC; a v24 ainda exige `NPM_TOKEN`)
    - **Sem** `NPM_TOKEN` / `NODE_AUTH_TOKEN`
    - **Sem** `registry-url` no `actions/setup-node` (quebra OIDC)
 3. Remover o secret `NPM_TOKEN` do GitHub **depois** do primeiro publish OIDC bem-sucedido.
 4. Runner: **GitHub-hosted** (self-hosted não é suportado pelo npm OIDC).
+
+## Se aparecer `ENONPMTOKEN`
+
+O plugin antigo (`@semantic-release/npm@12`, bundled no semantic-release 24) ainda valida token no `verifyConditions`. Suba para semantic-release 25 e rode o release de novo no `master`. Não “consertar” recolocando `NPM_TOKEN` se o Trusted Publisher já está configurado.
 
 ## Fluxo
 
