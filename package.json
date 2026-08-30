@@ -1,25 +1,34 @@
 {
   "name": "maestro-express-async-errors",
   "version": "1.2.8",
-  "description": "A simple an secure layer of code for async middlewares.",
+  "description": "TypeScript-first async error wrapper for Express, with optional Express 4 global patch and domain error routing.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "module": "./dist/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./register": {
+      "types": "./dist/register.d.ts",
+      "import": "./dist/register.mjs",
+      "require": "./dist/register.js"
+    }
+  },
   "files": [
-    "dist",
-    "test",
-    "index.ts"
+    "dist"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/jjgouveia/maestro-express-async-errors.git"
   },
   "scripts": {
-    "test": "mocha --require ts-node/register test/**/*.ts",
-    "coverage": "nyc -r text -r json-summary mocha --require ts-node/register test/**/*.ts",
-    "build": "rm -rf ./dist && tsup index.ts --format cjs,esm --dts --out-dir dist",
+    "test": "mocha --require tsx/cjs \"test/**/*.ts\"",
+    "coverage": "nyc -r text -r json-summary mocha --require tsx/cjs \"test/**/*.ts\"",
+    "build": "tsup",
     "lint": "tsc",
-    "eslint": "eslint --ext .ts,.tsx .",
     "ci": "npm run lint && npm run build && npm run test",
     "semantic-release": "semantic-release --branches master",
     "commit": "git-cz",
@@ -34,30 +43,44 @@
     "await",
     "async/await",
     "error",
-    "handling"
+    "handling",
+    "typescript",
+    "express-async-handler",
+    "error-handler"
   ],
-  "author": "Jr Gouveia <gouvik.dev@gmail.com>",
+  "author": "Jarbas Gouveia <gouvik.dev@gmail.com>",
   "license": "MIT",
+  "peerDependencies": {
+    "express": ">=4.16.2"
+  },
+  "peerDependenciesMeta": {
+    "express": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
-    "@types/express": "4.17.17",
+    "@types/express": "^4.17.21",
     "@types/mocha": "^10.0.1",
     "@types/sinon": "^10.0.13",
     "@types/sinon-chai": "^3.2.9",
+    "@types/supertest": "^6.0.2",
     "chai": "^4.3.4",
     "commitizen": "^4.3.0",
     "cz-conventional-changelog": "^3.3.0",
+    "express": "^4.21.2",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
-    "semantic-release": "^21.0.1",
+    "semantic-release": "^24.2.3",
     "sinon": "^11.1.2",
     "sinon-chai": "^3.7.0",
-    "tsup": "^6.7.0",
-    "tsx": "^3.12.6",
+    "supertest": "^7.0.0",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.3",
     "typescript": "^5.0.4"
   },
   "engines": {
-    "node": ">=7.6.0"
+    "node": ">=18"
   },
   "bugs": {
     "url": "https://github.com/jjgouveia/maestro-express-async-errors/issues"

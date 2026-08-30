@@ -1,155 +1,98 @@
-![node-current](https://img.shields.io/node/v/maestro-express-async-errors)
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-[![CI RELEASE](https://github.com/jjgouveia/maestro-express-async-errors/actions/workflows/ci.yml/badge.svg)](https://github.com/jjgouveia/maestro-express-async-errors/actions/workflows/ci.yml)
-![Downloads](https://img.shields.io/npm/dy/maestro-express-async-errors)
-[![cov](https://jjgouveia.github.io/maestro-express-async-errors/badges/coverage.svg)](https://github.com/jjgouveia/maestro-express-async-errors/actions)
-# Maestro for ExpressJS Async Errors
-### 🏆 The async/await heaven!
-<hr>
+# Maestro for Express async errors
 
-## Maestro is a slightly layer of code that acts as a wrapper, without any dependencies, for async middlewares. Its purpose is to ensure that all errors occurring in async operations are properly passed to your stack of error handlers. By doing so, Maestro helps to improve the readability and cleanliness of your code.
+TypeScript-first helpers so rejected promises and thrown errors in Express handlers reach your error middleware.
 
-### Installation:
+**Zero runtime dependencies.** Peer: `express` `>=4.16.2`.
 
-```
-npm install --save maestro-express-async-errors
-```
-or
-```
-yarn add maestro-express-async-errors
-```
-<br>
+## When to use
 
-> **Note**
-> The minimum supported `Node` version for Maestro is `7.6.0`.
+| Setup | Recommendation |
+| --- | --- |
+| **Express 4** | Use `maestro()` / `asyncHandler`, or opt-in global patch via `register` |
+| **Express 5** | Async errors are native — wrappers are optional; `maestro.from` still helps for domain errors |
+| **New projects** | Prefer Express 5; keep Maestro only if you want typed domain error routing |
 
-## How to use it
+## Install
 
-**With maestro:**
-
-```javascript
-const { maestro } = require('maestro-express-async-errors');
-
-
-express.get('/', maestro(async (req, res, next) => {
-	const bar = await foo.findAll();
-	res.send(bar)
-}))
+```bash
+npm install maestro-express-async-errors
 ```
 
-**Without maestro:**
+Node.js `>=18`.
 
-```javascript
-express.get('/',(req, res, next) => {
-    foo.findAll()
-    .then ( bar => {
-       res.send(bar)
-     } )
-    .catch(next); // error passed on to the error handling route
-})
-```
-### So Easy right? 😉
+## Three modes
 
-**Now let I show you more exemples and functionalities:**
+### 1. Per-route wrapper (Express 4 and 5)
 
-*  `maestro` insures thrown errors are passed to `next` callback:
+Drop-in compatible with [`express-async-handler`](https://www.npmjs.com/package/express-async-handler):
 
-```js
-const { maestro } = require('maestro-express-async-errors');
+```ts
+import { maestro, asyncHandler } from "maestro-express-async-errors";
 
-app.get('/:id', maestro(async (req, res, next) => {
-    const user = await repository.getById(req.params.id)
+app.get(
+  "/users/:id",
+  maestro(async (req, res) => {
+    const user = await repository.getById(req.params.id);
+    if (!user) throw new UserNotFoundError();
+    res.json(user);
+  })
+);
 
-    if (!user) {
-      throw new UserNotFoundError
-    }
-
-    res.status(200)
-       .json(user)
-}))
-
+// alias
+app.get("/health", asyncHandler(async (_req, res) => {
+  res.send("ok");
+}));
 ```
 
-* `maestro.from` allows you to handle a specific error which is helpful for handling domain driven errors.
-```js
+### 2. Batch wrap — `maestro.all`
 
-app.use(maestro.from(UserNotFoundError, (err, req, res, next) => {
-    res.status(404)
-       .json({ error: 'these are not the droids you\'re looking for'})
-})
+```ts
+app.post("/products", ...maestro.all([validationFn, createProductFn]));
+```
 
-/**
-  Your error handlers still works as expected. If an error doesn't match your `maestro.from` criteria, it will find its way to the next error handler.
- */
+### 3. Global patch (Express 4 only) — opt-in
+
+Same DX as [`express-async-errors`](https://www.npmjs.com/package/express-async-errors). **Does nothing on Express 5+** (native promise support; patching would risk double `next(err)`).
+
+```ts
+import "maestro-express-async-errors/register";
+// or: import { maestro } from "maestro-express-async-errors"; maestro.patch();
+
+app.get("/users", async (req, res) => {
+  res.json(await User.findAll());
+});
+```
+
+> Patch touches Express 4 router internals. After upgrading to Express 5, remove the `register` import.
+
+## Domain errors — `maestro.from`
+
+```ts
+app.use(
+  maestro.from(UserNotFoundError, (err, req, res, next) => {
+    res.status(404).json({ error: err.message });
+  })
+);
+
 app.use((err, req, res, next) => {
-    res.status(500)
-       .json({ error: 'i have a bad feeling about this'})
-})
-
+  res.status(500).json({ error: "internal" });
+});
 ```
 
-*  There's a helper function `maestro.all([...])` in case you want to wrap several functions with `maestro`. With `maestro.all`, doing `[maestro(fn1), maestro(fn2)]` can be shortened to `maestro.all([fn1, fn2])`.
+Unmatched errors fall through to the next error middleware.
 
-```js
-const maestro = require('maestro-express-async-errors')
+## Compared to alternatives
 
-// Doing it like this
-app.post('/products', maestro.all([
-    validationFn,
-    createProductFn
-]))
+- **express-async-handler** — same per-route wrap idea; Maestro adds TypeScript types, `maestro.from`, and `maestro.all`.
+- **express-async-errors** — same global-patch idea on Express 4; Maestro’s patch is opt-in (`/register`), no-op on Express 5, and ships with the wrapper API in one package.
 
-// Is equivalent to this
-app.post('/products', [
-    maestro(validationFn),
-    maestro(createProductFn)
-])
-```
-#### Import in Typescript:
+## Presence checklist (maintainers)
 
-```javascript
-import { maestro } from "maestro-express-async-errors"
-```
+- [ ] Publish / refresh [docs/why-maestro.md](docs/why-maestro.md) (Dev.to or blog)
+- [ ] Confirm NPM package description after release
+- [ ] Triage open GitHub issues/PRs
+- [ ] See [docs/publishing.md](docs/publishing.md) for OIDC release setup
 
-<br>
+## License
 
-## Test Cases
-
-```txt
-> maestro-express-async-errors@1.2.5 test
-> mocha --require ts-node/register test/**/*.ts
-
-
-
-  Try maestro(async (req, res, next) => { next() or Error }) :
-    Basic functionality:
-      ✔ Maestro is a function.
-      ✔ Maestro returns a function.
-      ✔ Maestro returns a function that returns a promise.
-      ✔ When an asynchronous function passed into it throws an error, it is expected that the calls next with that error.
-      ✔ When a non-asynchronous function passed into it throws an error, it is expected that calls next with that error.
-      ✔ Should invoke `next` when passing a non-async function.
-      ✔ Thenables are not guaranteed to have a `catch` method. This test refers to this.
-    Should invoke `next` with the thrown error:
-      ✔ If an async function is passed as an argument, the next function should be called with the provided arguments.
-      ✔ Works like a charm if all arguments are passed to the callback function.
-      ✔ Raises a TypeError if next args it's not a function.
-      ✔ A valid call works for routes and middlewares.
-      ✔ A valid call works for error handler middlewares.
-
-  Try maestro.from(RealProblems, (err) => { }) :
-    ✔ Handles the error when error is instance of given constructor.
-    ✔ It call `next` function if error is not an instance of given constructor.
-
-  Try maestro.all([...args]) :
-    ✔ Raises a TypeError when `next` it's not function.
-    ✔ Should return an array.
-    ✔ Should return an array of functions
-    ✔ Should return an array of functions that returns a promise.
-    ✔ Should return an array of functions that returns a promise that calls next.
-    ✔ Should return an array of functions that returns a promise that calls next with the error.
-
-
-  20 passing (75ms)
-```
-
+MIT

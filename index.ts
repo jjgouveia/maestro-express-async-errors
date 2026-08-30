@@ -1,11 +1,9 @@
-import { ErrorRequestHandler, RequestHandler } from "express";
+import { RequestHandler } from "express";
 import { Request, Response, NextFunction } from "express";
 import { ParamsDictionary, Query } from "express-serve-static-core";
-import { ParsedQs } from "qs";
+import { patch } from "./patch";
 
-export type ErrorConstructor<T extends unknown[]> = new (
-  ...args: T
-) => ErrorRequestHandler;
+export type ErrorConstructor = new (...args: any[]) => Error;
 
 export type Callback<
   P = ParamsDictionary,
@@ -14,15 +12,23 @@ export type Callback<
   ReqQuery = Query
 > = (
   ...args: Parameters<RequestHandler<P, ResBody, ReqBody, ReqQuery>>
-) => void;
+) => any;
+
+export type ErrorCallback = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => any;
 
 export interface Maestro {
   (middleware: Callback): Callback;
-  from(constructor: ErrorConstructor<[]>, middleware: Callback): Callback;
+  from(constructor: ErrorConstructor, middleware: ErrorCallback): ErrorCallback;
   all(callbacks: Callback[]): Callback[];
+  patch(): void;
 }
 
-const maestro = function opera(middleware: Callback) {
+function opera(middleware: Callback): Callback {
   return async function orchestra(...args: any[]): Promise<void> {
     const fnReturn = middleware(...(args as Parameters<RequestHandler>));
     const next = args[args.length - 1];
@@ -31,16 +37,13 @@ const maestro = function opera(middleware: Callback) {
     }
     return Promise.resolve(fnReturn).catch(next);
   };
-};
+}
+
+const maestro = opera as Maestro;
 
 maestro.from = function from(
-  constructor: any,
-  middleware: (
-    arg0: Error,
-    arg1: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>,
-    arg2: Response<any, Record<string, any>>,
-    arg3: NextFunction
-  ) => void
+  constructor: ErrorConstructor,
+  middleware: ErrorCallback
 ) {
   return function errorHandler(
     err: Error,
@@ -61,8 +64,14 @@ maestro.all = function all(callbacks: Callback[]) {
   return callbacks.map(maestro);
 };
 
+maestro.patch = patch;
+
 Object.freeze(maestro);
 Object.freeze(maestro.from);
 Object.freeze(maestro.all);
+Object.freeze(maestro.patch);
 
-export { maestro };
+/** Drop-in alias for express-async-handler compatibility */
+const asyncHandler = maestro;
+
+export { maestro, asyncHandler, patch };

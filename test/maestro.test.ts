@@ -4,7 +4,7 @@ import { expect } from "chai";
 import sinon from "sinon";
 import chai from "chai";
 import sinonChai from "sinon-chai";
-import { maestro } from "../dist/index.js";
+import { maestro, asyncHandler } from "../index";
 
 chai.use(sinonChai);
 chai.should();
@@ -15,6 +15,10 @@ describe("Try maestro(async (req, res, next) => { next() or Error }) :", () => {
   describe("Basic functionality:", () => {
     it("Maestro is a function.", () => {
       expect(maestro).to.be.a("function");
+    });
+
+    it("asyncHandler is an alias of maestro.", () => {
+      expect(asyncHandler).to.equal(maestro);
     });
 
     it("Maestro returns a function.", () => {
@@ -151,9 +155,8 @@ describe("Try maestro(async (req, res, next) => { next() or Error }) :", () => {
 });
 
 describe("Try maestro.from(RealProblems, (err) => { }) :", () => {
-  class RealProblems extends Error {} // RealProblems is a subclass of Error.
-  class NonRealProblems {} // NonRealProblems is not a subclass of Error,
-  // that is, for example, what you get when you are anxious.
+  class RealProblems extends Error {}
+  class NonRealProblems {}
 
   const req = {} as any;
   const res = {} as any;
