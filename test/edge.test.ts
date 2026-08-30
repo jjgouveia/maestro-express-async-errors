@@ -5,6 +5,7 @@ import sinon from "sinon";
 import express from "express";
 import request from "supertest";
 import { maestro } from "../index";
+import { jsonErrorHandler } from "./helpers";
 
 describe("maestro edge cases", () => {
   it("forwards non-Error rejection values to next", async () => {
@@ -156,16 +157,7 @@ describe("maestro.from with Express integration", () => {
       })
     );
 
-    app.use(
-      (
-        err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
-        res.status(500).json({ error: err.message });
-      }
-    );
+    app.use(jsonErrorHandler(500));
 
     return app;
   }

@@ -1,6 +1,5 @@
 type AnyFn = (...args: any[]) => any;
 
-type ExpressPackage = { version: string };
 type RouterInternals = {
   Layer: { prototype: { handle?: AnyFn; __handle?: AnyFn } };
   Router: {
@@ -17,11 +16,15 @@ let expressMajorOverride: number | null = null;
 let forceExpressMissing = false;
 let forceInternalsFailure = false;
 
-function loadExpressPackage(): ExpressPackage {
+function getExpressMajor(): number {
+  if (expressMajorOverride !== null) {
+    return expressMajorOverride;
+  }
   if (forceExpressMissing) {
     throw new Error("express missing (test)");
   }
-  return require("express/package.json") as ExpressPackage;
+  const pkg = require("express/package.json") as { version: string };
+  return Number.parseInt(pkg.version.split(".")[0] ?? "0", 10);
 }
 
 function loadRouterInternals(): RouterInternals {
@@ -34,33 +37,13 @@ function loadRouterInternals(): RouterInternals {
   };
 }
 
-function getExpressMajor(): number {
-  if (expressMajorOverride !== null) {
-    return expressMajorOverride;
-  }
-  const pkg = loadExpressPackage();
-  return Number.parseInt(pkg.version.split(".")[0] ?? "0", 10);
-}
-
-export function shouldApplyPatch(major: number): boolean {
-  return major === 4;
-}
-
-function copyFnProps(oldFn: AnyFn, newFn: AnyFn): AnyFn {
-  for (const key of Object.keys(oldFn)) {
-    (newFn as any)[key] = (oldFn as any)[key];
-  }
-  return newFn;
-}
-
 function wrap(fn: AnyFn): AnyFn {
-  const last = (arr: any[]) => arr[arr.length - 1];
   const noop = Function.prototype as (...args: any[]) => void;
 
   function wrapped(this: unknown, ...args: any[]) {
     const ret = fn.apply(this, args);
     const next =
-      (args.length === 5 ? args[2] : last(args)) || noop;
+      (args.length === 5 ? args[2] : args[args.length - 1]) || noop;
     if (ret && typeof ret.catch === "function") {
       ret.catch((err: unknown) => next(err));
     }
@@ -72,7 +55,10 @@ function wrap(fn: AnyFn): AnyFn {
     writable: false,
   });
 
-  return copyFnProps(fn, wrapped);
+  for (const key of Object.keys(fn)) {
+    (wrapped as any)[key] = (fn as any)[key];
+  }
+  return wrapped;
 }
 
 /**
@@ -93,7 +79,7 @@ export function patch(): void {
     );
   }
 
-  if (!shouldApplyPatch(major)) {
+  if (major !== 4) {
     isPatched = true;
     return;
   }
@@ -133,9 +119,12 @@ export function patch(): void {
   isPatched = true;
 }
 
-/** @internal */
-export function __resetPatchFlagForTests(): void {
+/** @internal — clears patch flag and all test overrides */
+export function __resetPatchTestState(): void {
   isPatched = false;
+  expressMajorOverride = null;
+  forceExpressMissing = false;
+  forceInternalsFailure = false;
 }
 
 /** @internal */

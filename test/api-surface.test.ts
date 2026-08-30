@@ -3,20 +3,17 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { maestro, asyncHandler, patch } from "../index";
+import { __isPatchedForTests } from "../patch";
 import {
-  __isPatchedForTests,
-  __resetPatchFlagForTests,
+  resetPatchTestHooks,
   __setExpressMajorForTests,
   __setForceExpressMissingForTests,
   __setForceInternalsFailureForTests,
-  patch as patchFn,
-  shouldApplyPatch,
-} from "../patch";
+} from "./helpers";
 
 describe("public API surface", () => {
   it("exposes maestro.patch as the same function as patch()", () => {
     expect(maestro.patch).to.equal(patch);
-    expect(maestro.patch).to.equal(patchFn);
   });
 
   it("exposes asyncHandler as the same function as maestro", () => {
@@ -28,15 +25,10 @@ describe("public API surface", () => {
 });
 
 describe("register side-effect entry", () => {
-  afterEach(() => {
-    __setExpressMajorForTests(null);
-    __setForceExpressMissingForTests(false);
-    __setForceInternalsFailureForTests(false);
-    __resetPatchFlagForTests();
-  });
+  afterEach(resetPatchTestHooks);
 
   it("calls patch() when the register module is loaded", () => {
-    __resetPatchFlagForTests();
+    resetPatchTestHooks();
     __setExpressMajorForTests(5);
     expect(__isPatchedForTests()).to.equal(false);
 
@@ -53,15 +45,10 @@ describe("register side-effect entry", () => {
 });
 
 describe("patch failure modes", () => {
-  afterEach(() => {
-    __setExpressMajorForTests(null);
-    __setForceExpressMissingForTests(false);
-    __setForceInternalsFailureForTests(false);
-    __resetPatchFlagForTests();
-  });
+  afterEach(resetPatchTestHooks);
 
   it("throws a clear error when express cannot be resolved", () => {
-    __resetPatchFlagForTests();
+    resetPatchTestHooks();
     __setForceExpressMissingForTests(true);
 
     expect(() => patch()).to.throw(
@@ -71,7 +58,7 @@ describe("patch failure modes", () => {
   });
 
   it("throws a clear error when Express 4 router internals cannot be loaded", () => {
-    __resetPatchFlagForTests();
+    resetPatchTestHooks();
     __setExpressMajorForTests(4);
     __setForceInternalsFailureForTests(true);
 
@@ -80,12 +67,11 @@ describe("patch failure modes", () => {
   });
 
   it("treats Express 3 as no-op like Express 5", () => {
-    __resetPatchFlagForTests();
+    resetPatchTestHooks();
     __setExpressMajorForTests(3);
 
     expect(() => patch()).to.not.throw();
     expect(__isPatchedForTests()).to.equal(true);
-    expect(shouldApplyPatch(3)).to.equal(false);
   });
 });
 

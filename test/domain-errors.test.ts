@@ -4,6 +4,7 @@ import { expect } from "chai";
 import express from "express";
 import request from "supertest";
 import { maestro, type ErrorCallback } from "../index";
+import { jsonErrorHandler } from "./helpers";
 
 class UserNotFoundError extends Error {
   readonly code = "USER_NOT_FOUND" as const;
@@ -88,16 +89,7 @@ describe("typed domain errors with maestro.from", () => {
       })
     );
 
-    app.use(
-      (
-        err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
-        res.status(500).json({ error: err.message });
-      }
-    );
+    app.use(jsonErrorHandler(500));
 
     const missing = await request(app).get("/users/abc");
     expect(missing.status).to.equal(404);

@@ -4,35 +4,23 @@ import { expect } from "chai";
 import express from "express";
 import request from "supertest";
 import { maestro } from "../index";
+import { patch } from "../patch";
 import {
-  __resetPatchFlagForTests,
+  jsonErrorHandler,
+  resetPatchTestHooks,
   __setExpressMajorForTests,
-  patch,
-  shouldApplyPatch,
-} from "../patch";
-
-describe("shouldApplyPatch", () => {
-  it("applies only on Express major 4", () => {
-    expect(shouldApplyPatch(4)).to.equal(true);
-    expect(shouldApplyPatch(5)).to.equal(false);
-    expect(shouldApplyPatch(3)).to.equal(false);
-  });
-});
+} from "./helpers";
 
 describe("maestro.patch() with mocked Express 5", () => {
   // Must run before the Express 4 suite mutates Layer.prototype.
   before(() => {
-    __resetPatchFlagForTests();
+    resetPatchTestHooks();
     __setExpressMajorForTests(5);
   });
 
-  after(() => {
-    __setExpressMajorForTests(null);
-    __resetPatchFlagForTests();
-  });
+  after(resetPatchTestHooks);
 
   it("is a no-op and does not redefine Layer.prototype.handle", () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const Layer = require("express/lib/router/layer");
     const before = Object.getOwnPropertyDescriptor(Layer.prototype, "handle");
 
@@ -49,8 +37,7 @@ describe("maestro.patch() with mocked Express 5", () => {
 
 describe("maestro.patch() with Express 4", () => {
   before(() => {
-    __setExpressMajorForTests(null);
-    __resetPatchFlagForTests();
+    resetPatchTestHooks();
     patch();
   });
 
@@ -59,16 +46,7 @@ describe("maestro.patch() with Express 4", () => {
     app.get("/throw", async (_req, _res) => {
       throw new Error("boom");
     });
-    app.use(
-      (
-        err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
-        res.status(500).json({ error: err.message });
-      }
-    );
+    app.use(jsonErrorHandler(500));
 
     const res = await request(app).get("/throw");
     expect(res.status).to.equal(500);
@@ -80,16 +58,7 @@ describe("maestro.patch() with Express 4", () => {
     app.get("/reject", async (_req, _res) => {
       await Promise.reject(new Error("rejected"));
     });
-    app.use(
-      (
-        err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
-        res.status(500).json({ error: err.message });
-      }
-    );
+    app.use(jsonErrorHandler(500));
 
     const res = await request(app).get("/reject");
     expect(res.status).to.equal(500);
@@ -125,16 +94,7 @@ describe("maestro.patch() with Express 4", () => {
     app.get("/ok", (_req, res) => {
       res.send("ok");
     });
-    app.use(
-      (
-        err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
-        res.status(500).json({ error: err.message });
-      }
-    );
+    app.use(jsonErrorHandler(500));
 
     const res = await request(app).get("/ok");
     expect(res.status).to.equal(500);
@@ -187,16 +147,7 @@ describe("maestro.patch() with Express 4", () => {
       res.status(200).json({ id: req.params.id });
     });
 
-    app.use(
-      (
-        err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
-        res.status(400).json({ error: err.message });
-      }
-    );
+    app.use(jsonErrorHandler(400));
 
     const fail = await request(app).get("/items/bad");
     expect(fail.status).to.equal(400);
@@ -221,16 +172,7 @@ describe("maestro.patch() with Express 4", () => {
       res.status(200).json({ slug: req.params.slug });
     });
 
-    app.use(
-      (
-        err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
-        res.status(422).json({ error: err.message });
-      }
-    );
+    app.use(jsonErrorHandler(422));
 
     const res = await request(app).get("/posts/nope");
     expect(res.status).to.equal(422);

@@ -1,5 +1,9 @@
-import { RequestHandler } from "express";
-import { Request, Response, NextFunction } from "express";
+import {
+  RequestHandler,
+  Request,
+  Response,
+  NextFunction,
+} from "express";
 import { ParamsDictionary, Query } from "express-serve-static-core";
 import { patch } from "./patch";
 
@@ -23,19 +27,12 @@ export type ErrorCallback<T extends Error = Error> = (
   next: NextFunction
 ) => any;
 
-export type ExpressErrorHandler = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => any;
-
 export interface Maestro {
   (middleware: Callback): Callback;
   from<T extends Error>(
     constructor: ErrorConstructor<T>,
     middleware: ErrorCallback<T>
-  ): ExpressErrorHandler;
+  ): ErrorCallback;
   all(callbacks: Callback[]): Callback[];
   patch(): void;
 }
@@ -61,7 +58,7 @@ const maestro = opera as Maestro;
 maestro.from = function from<T extends Error>(
   constructor: ErrorConstructor<T>,
   middleware: ErrorCallback<T>
-): ExpressErrorHandler {
+): ErrorCallback {
   return function errorHandler(
     err: Error,
     req: Request,
