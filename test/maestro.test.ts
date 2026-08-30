@@ -26,7 +26,8 @@ describe("Try maestro(async (req, res, next) => { next() or Error }) :", () => {
     });
 
     it("Maestro returns a function that returns a promise.", () => {
-      expect(maestro(() => {})()).to.be.a("promise");
+      const next = () => {};
+      expect(maestro(() => {})({}, {}, next)).to.be.a("promise");
     });
 
     it("When an asynchronous function passed into it throws an error, it is expected that the calls next with that error.", async () => {
@@ -234,7 +235,7 @@ describe("Try maestro.all([...args]) :", () => {
       next("test");
     });
 
-    expect(maestro.all([foo])[0]()).to.be.a("promise");
+    expect(maestro.all([foo])[0]({}, {}, () => {})).to.be.a("promise");
   });
   it("Should return an array of functions that returns a promise that calls next.", async () => {
     const foo = maestro(async (_req: any, _res: any, _next: any) => {
