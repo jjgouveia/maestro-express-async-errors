@@ -107,6 +107,6 @@
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
     "noEmit": true,                                       /* Disable emitting files from a compilation. */
   },
-  "include": ["index.ts", "register.ts", "patch.ts"],
+  "include": ["index.ts", "register.ts", "patch.ts", "forward.ts"],
   "exclude": ["dist", "node_modules", "test", "tsup.config.ts"]
 }

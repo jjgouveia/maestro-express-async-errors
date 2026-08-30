@@ -5,6 +5,7 @@ import {
   NextFunction,
 } from "express";
 import { ParamsDictionary, Query } from "express-serve-static-core";
+import { runWithNext } from "./forward";
 import { patch } from "./patch";
 
 export type ErrorConstructor<T extends Error = Error> = new (
@@ -43,13 +44,10 @@ function opera(middleware: Callback): Callback {
     if (typeof next !== "function") {
       throw new TypeError("Next is not a function");
     }
-    try {
-      return Promise.resolve(
-        middleware(...(args as Parameters<RequestHandler>))
-      ).catch(next);
-    } catch (err) {
-      next(err);
-    }
+    return runWithNext(
+      () => middleware(...(args as Parameters<RequestHandler>)),
+      next
+    );
   };
 }
 

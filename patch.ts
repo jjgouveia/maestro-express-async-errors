@@ -1,3 +1,5 @@
+import { catchThenables } from "./forward";
+
 type AnyFn = (...args: any[]) => any;
 
 type RouterInternals = {
@@ -11,30 +13,27 @@ type RouterInternals = {
   };
 };
 
+type ExpressPackage = { version: string };
+
+const defaultLoadExpressPackage = (): ExpressPackage =>
+  require("express/package.json");
+
+const defaultLoadRouterInternals = (): RouterInternals => ({
+  Layer: require("express/lib/router/layer"),
+  Router: require("express/lib/router"),
+});
+
 let isPatched = false;
 let expressMajorOverride: number | null = null;
-let forceExpressMissing = false;
-let forceInternalsFailure = false;
+let loadExpressPackage = defaultLoadExpressPackage;
+let loadRouterInternals = defaultLoadRouterInternals;
 
 function getExpressMajor(): number {
   if (expressMajorOverride !== null) {
     return expressMajorOverride;
   }
-  if (forceExpressMissing) {
-    throw new Error("express missing (test)");
-  }
-  const pkg = require("express/package.json") as { version: string };
+  const pkg = loadExpressPackage();
   return Number.parseInt(pkg.version.split(".")[0] ?? "0", 10);
-}
-
-function loadRouterInternals(): RouterInternals {
-  if (forceInternalsFailure) {
-    throw new Error("internals missing (test)");
-  }
-  return {
-    Layer: require("express/lib/router/layer"),
-    Router: require("express/lib/router"),
-  };
 }
 
 function wrap(fn: AnyFn): AnyFn {
@@ -44,10 +43,7 @@ function wrap(fn: AnyFn): AnyFn {
     const ret = fn.apply(this, args);
     const next =
       (args.length === 5 ? args[2] : args[args.length - 1]) || noop;
-    if (ret && typeof ret.catch === "function") {
-      ret.catch((err: unknown) => next(err));
-    }
-    return ret;
+    return catchThenables(ret, next);
   }
 
   Object.defineProperty(wrapped, "length", {
@@ -119,12 +115,12 @@ export function patch(): void {
   isPatched = true;
 }
 
-/** @internal — clears patch flag and all test overrides */
+/** @internal */
 export function __resetPatchTestState(): void {
   isPatched = false;
   expressMajorOverride = null;
-  forceExpressMissing = false;
-  forceInternalsFailure = false;
+  loadExpressPackage = defaultLoadExpressPackage;
+  loadRouterInternals = defaultLoadRouterInternals;
 }
 
 /** @internal */
@@ -132,14 +128,26 @@ export function __setExpressMajorForTests(major: number | null): void {
   expressMajorOverride = major;
 }
 
-/** @internal */
-export function __setForceExpressMissingForTests(value: boolean): void {
-  forceExpressMissing = value;
-}
-
-/** @internal */
-export function __setForceInternalsFailureForTests(value: boolean): void {
-  forceInternalsFailure = value;
+/** @internal — inject loaders (no force-flags on the production path) */
+export function __setPatchDepsForTests(
+  deps: {
+    loadExpressPackage?: (() => ExpressPackage) | null;
+    loadRouterInternals?: (() => RouterInternals) | null;
+  } | null
+): void {
+  if (!deps) {
+    loadExpressPackage = defaultLoadExpressPackage;
+    loadRouterInternals = defaultLoadRouterInternals;
+    return;
+  }
+  if (deps.loadExpressPackage !== undefined) {
+    loadExpressPackage =
+      deps.loadExpressPackage ?? defaultLoadExpressPackage;
+  }
+  if (deps.loadRouterInternals !== undefined) {
+    loadRouterInternals =
+      deps.loadRouterInternals ?? defaultLoadRouterInternals;
+  }
 }
 
 /** @internal */

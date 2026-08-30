@@ -2,8 +2,7 @@ import type { ErrorRequestHandler } from "express";
 import {
   __resetPatchTestState,
   __setExpressMajorForTests,
-  __setForceExpressMissingForTests,
-  __setForceInternalsFailureForTests,
+  __setPatchDepsForTests,
 } from "../patch";
 
 export function jsonErrorHandler(status = 500): ErrorRequestHandler {
@@ -16,8 +15,4 @@ export function resetPatchTestHooks(): void {
   __resetPatchTestState();
 }
 
-export {
-  __setExpressMajorForTests,
-  __setForceExpressMissingForTests,
-  __setForceInternalsFailureForTests,
-};
+export { __setExpressMajorForTests, __setPatchDepsForTests };

@@ -61,12 +61,58 @@ describe("maestro edge cases", () => {
     await second({}, {}, next);
     expect(next).to.have.been.calledWith(error);
   });
+
+  it("forwards rejected null / undefined to next", async () => {
+    const nextNull = sinon.spy();
+    await maestro(async () => Promise.reject(null))({}, {}, nextNull);
+    expect(nextNull).to.have.been.calledWith(null);
+
+    const nextUndef = sinon.spy();
+    await maestro(async () => Promise.reject(undefined))({}, {}, nextUndef);
+    expect(nextUndef).to.have.been.calledWith(undefined);
+  });
+
+  it("does not call next when handler returns a resolved non-promise value", async () => {
+    const next = sinon.spy();
+    await maestro(() => "ok")({}, {}, next);
+    expect(next).not.to.have.been.called;
+  });
+
+  it("wraps error-middleware arity (4 args) and forwards thrown errors", async () => {
+    const next = sinon.spy();
+    const boom = new Error("eh");
+    const handler = maestro(
+      async (_err: Error, _req: unknown, _res: unknown, _next: unknown) => {
+        throw boom;
+      }
+    );
+
+    await handler(boom, {}, {}, next);
+    expect(next).to.have.been.calledWith(boom);
+  });
+
+  it("maestro.all preserves order and length", () => {
+    const a = async () => undefined;
+    const b = async () => undefined;
+    const wrapped = maestro.all([a, b]);
+    expect(wrapped).to.have.length(2);
+    expect(wrapped[0]).to.be.a("function");
+    expect(wrapped[1]).to.be.a("function");
+  });
 });
 
 describe("maestro.from edge cases", () => {
   class NotFound extends Error {}
   class NotFoundChild extends NotFound {}
   class ValidationError extends Error {}
+  class CodedError extends Error {
+    code: string;
+    constructor(message: string, code: string) {
+      super(message);
+      this.name = "CodedError";
+      this.code = code;
+    }
+  }
 
   const req = {} as express.Request;
   const res = {} as express.Response;
@@ -119,6 +165,28 @@ describe("maestro.from edge cases", () => {
     expect(validation).not.to.have.been.called;
     expect(notFound).not.to.have.been.called;
     expect(finalNext).to.have.been.calledWith(err);
+  });
+
+  it("matches Error base constructor for any Error subclass", () => {
+    const matched = sinon.spy();
+    const next = sinon.spy();
+    maestro.from(Error, matched)(
+      new CodedError("x", "X"),
+      req,
+      res,
+      next
+    );
+    expect(matched).to.have.been.calledOnce;
+    expect(next).not.to.have.been.called;
+  });
+
+  it("does not treat plain objects as matching Error constructors", () => {
+    const matched = sinon.spy();
+    const next = sinon.spy();
+    const weird = { message: "nope" } as Error;
+    maestro.from(CodedError, matched)(weird, req, res, next);
+    expect(matched).not.to.have.been.called;
+    expect(next).to.have.been.calledWith(weird);
   });
 });
 
