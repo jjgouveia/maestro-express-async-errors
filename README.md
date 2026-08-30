@@ -86,6 +86,79 @@ Unmatched errors fall through to the next error middleware.
 - **express-async-handler** — same per-route wrap idea; Maestro adds TypeScript types, `maestro.from`, and `maestro.all`.
 - **express-async-errors** — same global-patch idea on Express 4; Maestro’s patch is opt-in (`/register`), no-op on Express 5, and ships with the wrapper API in one package.
 
+## Migrate from competitors
+
+### From `express-async-handler`
+
+Drop-in: keep calling `asyncHandler`, change the import. Or rename to `maestro`.
+
+```ts
+// before
+import asyncHandler from "express-async-handler";
+
+app.get("/users/:id", asyncHandler(async (req, res) => {
+  res.json(await getUser(req.params.id));
+}));
+
+// after
+import { asyncHandler } from "maestro-express-async-errors";
+// or: import { maestro as asyncHandler } from "maestro-express-async-errors";
+
+app.get("/users/:id", asyncHandler(async (req, res) => {
+  res.json(await getUser(req.params.id));
+}));
+```
+
+```bash
+npm uninstall express-async-handler
+npm install maestro-express-async-errors
+```
+
+Optional after the swap: map domain errors with `maestro.from` instead of a single catch-all full of `instanceof`.
+
+### From `express-async-errors`
+
+Replace the side-effect import. Route handlers stay the same (no per-route wrap).
+
+```ts
+// before
+import "express-async-errors";
+import express from "express";
+
+const app = express();
+app.get("/users", async (_req, res) => {
+  res.json(await User.findAll());
+});
+
+// after (Express 4)
+import "maestro-express-async-errors/register";
+import express from "express";
+
+const app = express();
+app.get("/users", async (_req, res) => {
+  res.json(await User.findAll());
+});
+```
+
+```bash
+npm uninstall express-async-errors
+npm install maestro-express-async-errors
+```
+
+Put `register` **before** you mount routes, same habit as before.
+
+On **Express 5**, drop the patch import entirely. Native async errors cover that job. Keep Maestro only if you want `maestro.from` / wrappers.
+
+### From both at once
+
+Some apps use the global patch **and** wrap selected routes. With Maestro you pick one style (or mix on purpose):
+
+1. Global: `import "maestro-express-async-errors/register"` (Express 4 only).
+2. Per route: `maestro` / `asyncHandler` where you want it explicit.
+3. Domain: `maestro.from(SomeError, handler)` above your generic error middleware.
+
+You do not need two packages anymore.
+
 ## Presence checklist (maintainers)
 
 - [ ] Publish / refresh [docs/why-maestro.md](docs/why-maestro.md) (Dev.to or blog)

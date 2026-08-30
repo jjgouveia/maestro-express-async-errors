@@ -1,32 +1,33 @@
 # Por que Maestro (ainda)
 
-Pacote pequeno para Express: erros de handlers `async` chegam no middleware de erro, com TypeScript e roteamento por classe de erro.
+Eu fiz o Maestro pra um problema chato do Express 4: você escreve `async`, dá `throw` ou a promise rejeita, e o `next(err)` nunca é chamado. A request trava ou o processo cai.
 
-## A dor
+No Express 5 isso já é nativo. Wrapper vira opcional.
 
-No **Express 4**, `throw` / promise rejeitada dentro de um `async` handler **não** chama `next(err)`. A request pode travar ou derrubar o processo.
+## O que ele faz
 
-No **Express 5**, isso é nativo. Wrappers viram opcionais.
+`maestro(fn)` (e o alias `asyncHandler`) envolve a rota e manda rejeição pro middleware de erro. Mesma ideia do `express-async-handler`.
 
-## O que o Maestro faz
+Se você quer o estilo do `express-async-errors` (um import e pronto), tem `maestro.patch()` ou `import '.../register'`. Isso só mexe no Express 4. No 5 eu deixo no-op de propósito, pra não duplicar `next(err)`.
 
-1. **`maestro(fn)` / `asyncHandler`** — wrap por rota (`Promise.resolve(...).catch(next)`), igual ao `express-async-handler`.
-2. **`maestro.patch()` / `import '.../register'`** — patch global só no Express 4 (estilo `express-async-errors`). No Express 5 é no-op de propósito.
-3. **`maestro.from(ErrorClass, handler)`** — middleware de erro tipado para erros de domínio; o resto cai no handler genérico.
+O diferencial de verdade é o `maestro.from(ErrorClass, handler)`.
 
-Zero dependências de runtime.
+A maioria dos wrappers só resolve a metade técnica: o erro chega no middleware. O que sobra é um `app.use((err, req, res, next) => …)` gigante com `if/else` ou `instanceof` empilhado. Status HTTP, mensagem pro cliente e log misturados no mesmo bloco.
 
-## Quando usar
+Com o `from`, cada erro de domínio vira um middleware pequeno. `UserNotFoundError` responde 404. `PaymentFailedError` responde 402. O genérico no fim só pega o que ninguém mapeou. A rota só precisa `throwar` o erro. Quem lê o código vê a regra de negócio no nome da classe, não enterrada num catch-all.
 
-- Legado Express 4 que ainda não migrou.
-- Time que quer TypeScript + erros de domínio sem reinventar o wrap.
-- Querer **uma** lib com wrapper **e** patch opt-in.
+Isso muda o desenho: erro passa a ser contrato entre camadas, não string solta. No TypeScript a classe tipa o handler. Em app nova no Express 5 o wrap async pode sobrar, mas o `from` ainda vale se você quiser esse roteamento sem reinventar.
 
-## Quando não usar
+Zero dependência de runtime.
 
-- App nova em Express 5 sem necessidade de `from` — use o runtime nativo.
-- Preferir patch global de um pacote já dominante (`express-async-errors`) e não precisa de TypeScript/`from`.
+## Quando eu usaria
 
-## Mensagem curta
+App ainda no Express 4. Ou um time que quer TypeScript e erros de domínio sem reinventar o wrap. Uma lib com wrapper e patch opt-in no mesmo lugar.
 
-> Maestro: async errors no Express com TypeScript, `from` para domínio, e patch global opt-in só onde ainda faz sentido (Express 4).
+## Quando eu não usaria
+
+App nova no Express 5 e sem necessidade do `from`: fica no runtime nativo. Se o que você quer é só o patch global e o `express-async-errors` já resolve, não tem drama em usar o pacote de milhões de downloads.
+
+## Em uma frase
+
+Maestro leva erro async do Express até o middleware certo, com TypeScript e `from` pra domínio. Patch global só onde ainda faz sentido: Express 4.
