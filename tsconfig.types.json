@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["index.ts", "patch.ts", "register.ts", "test-types/**/*.ts"],
+  "exclude": ["dist", "node_modules", "test", "tsup.config.ts"]
+}

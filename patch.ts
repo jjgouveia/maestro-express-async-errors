@@ -1,13 +1,44 @@
 type AnyFn = (...args: any[]) => any;
 
+type ExpressPackage = { version: string };
+type RouterInternals = {
+  Layer: { prototype: { handle?: AnyFn; __handle?: AnyFn } };
+  Router: {
+    prototype: {
+      constructor: {
+        param: (name: string, fn: AnyFn) => unknown;
+      };
+    };
+  };
+};
+
 let isPatched = false;
 let expressMajorOverride: number | null = null;
+let forceExpressMissing = false;
+let forceInternalsFailure = false;
+
+function loadExpressPackage(): ExpressPackage {
+  if (forceExpressMissing) {
+    throw new Error("express missing (test)");
+  }
+  return require("express/package.json") as ExpressPackage;
+}
+
+function loadRouterInternals(): RouterInternals {
+  if (forceInternalsFailure) {
+    throw new Error("internals missing (test)");
+  }
+  return {
+    Layer: require("express/lib/router/layer"),
+    Router: require("express/lib/router"),
+  };
+}
 
 function getExpressMajor(): number {
   if (expressMajorOverride !== null) {
     return expressMajorOverride;
   }
-  const pkg = require("express/package.json") as { version: string };
+  const pkg = loadExpressPackage();
   return Number.parseInt(pkg.version.split(".")[0] ?? "0", 10);
 }
 
@@ -67,19 +98,11 @@ export function patch(): void {
     return;
   }
 
-  let Layer: { prototype: { handle?: AnyFn; __handle?: AnyFn } };
-  let Router: {
-    prototype: {
-      constructor: {
-        param: (name: string, fn: AnyFn) => unknown;
-      };
-    };
-  };
+  let Layer: RouterInternals["Layer"];
+  let Router: RouterInternals["Router"];
 
   try {
-    // Express 4 internals — intentional require for monkey-patch.
-    Layer = require("express/lib/router/layer");
-    Router = require("express/lib/router");
+    ({ Layer, Router } = loadRouterInternals());
   } catch {
     throw new Error(
       "maestro-express-async-errors: could not load Express 4 router internals. " +
@@ -110,12 +133,27 @@ export function patch(): void {
   isPatched = true;
 }
 
-/** @internal test helper — resets patch flag between suites */
+/** @internal */
 export function __resetPatchFlagForTests(): void {
   isPatched = false;
 }
 
-/** @internal test helper — simulate Express major (e.g. 5) without installing it */
+/** @internal */
 export function __setExpressMajorForTests(major: number | null): void {
   expressMajorOverride = major;
+}
+
+/** @internal */
+export function __setForceExpressMissingForTests(value: boolean): void {
+  forceExpressMissing = value;
+}
+
+/** @internal */
+export function __setForceInternalsFailureForTests(value: boolean): void {
+  forceInternalsFailure = value;
+}
+
+/** @internal */
+export function __isPatchedForTests(): boolean {
+  return isPatched;
 }

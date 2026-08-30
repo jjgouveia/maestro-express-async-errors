@@ -26,10 +26,11 @@
   },
   "scripts": {
     "test": "mocha --require tsx/cjs \"test/**/*.ts\"",
+    "test:types": "tsc -p tsconfig.types.json --noEmit",
     "coverage": "nyc -r text -r json-summary mocha --require tsx/cjs \"test/**/*.ts\"",
     "build": "tsup",
     "lint": "tsc",
-    "ci": "npm run lint && npm run build && npm run test",
+    "ci": "npm run lint && npm run build && npm run test && npm run test:types",
     "semantic-release": "semantic-release --branches master",
     "commit": "git-cz",
     "acp": "git add . && npm run commit && git push"
