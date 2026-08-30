@@ -1,8 +1,12 @@
 type AnyFn = (...args: any[]) => any;
 
 let isPatched = false;
+let expressMajorOverride: number | null = null;
 
 function getExpressMajor(): number {
+  if (expressMajorOverride !== null) {
+    return expressMajorOverride;
+  }
   const pkg = require("express/package.json") as { version: string };
   return Number.parseInt(pkg.version.split(".")[0] ?? "0", 10);
 }
@@ -109,4 +113,9 @@ export function patch(): void {
 /** @internal test helper — resets patch flag between suites */
 export function __resetPatchFlagForTests(): void {
   isPatched = false;
+}
+
+/** @internal test helper — simulate Express major (e.g. 5) without installing it */
+export function __setExpressMajorForTests(major: number | null): void {
+  expressMajorOverride = major;
 }
