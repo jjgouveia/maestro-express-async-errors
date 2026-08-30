@@ -3,7 +3,9 @@ import { Request, Response, NextFunction } from "express";
 import { ParamsDictionary, Query } from "express-serve-static-core";
 import { patch } from "./patch";
 
-export type ErrorConstructor = new (...args: any[]) => Error;
+export type ErrorConstructor<T extends Error = Error> = new (
+  ...args: any[]
+) => T;
 
 export type Callback<
   P = ParamsDictionary,
@@ -14,7 +16,14 @@ export type Callback<
   ...args: Parameters<RequestHandler<P, ResBody, ReqBody, ReqQuery>>
 ) => any;
 
-export type ErrorCallback = (
+export type ErrorCallback<T extends Error = Error> = (
+  err: T,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => any;
+
+export type ExpressErrorHandler = (
   err: Error,
   req: Request,
   res: Response,
@@ -23,7 +32,10 @@ export type ErrorCallback = (
 
 export interface Maestro {
   (middleware: Callback): Callback;
-  from(constructor: ErrorConstructor, middleware: ErrorCallback): ErrorCallback;
+  from<T extends Error>(
+    constructor: ErrorConstructor<T>,
+    middleware: ErrorCallback<T>
+  ): ExpressErrorHandler;
   all(callbacks: Callback[]): Callback[];
   patch(): void;
 }
@@ -35,9 +47,9 @@ function opera(middleware: Callback): Callback {
       throw new TypeError("Next is not a function");
     }
     try {
-      return Promise.resolve(middleware(...(args as Parameters<RequestHandler>))).catch(
-        next
-      );
+      return Promise.resolve(
+        middleware(...(args as Parameters<RequestHandler>))
+      ).catch(next);
     } catch (err) {
       next(err);
     }
@@ -46,10 +58,10 @@ function opera(middleware: Callback): Callback {
 
 const maestro = opera as Maestro;
 
-maestro.from = function from(
-  constructor: ErrorConstructor,
-  middleware: ErrorCallback
-) {
+maestro.from = function from<T extends Error>(
+  constructor: ErrorConstructor<T>,
+  middleware: ErrorCallback<T>
+): ExpressErrorHandler {
   return function errorHandler(
     err: Error,
     req: Request,

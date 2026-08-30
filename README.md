@@ -67,10 +67,44 @@ app.get("/users", async (req, res) => {
 
 ## Domain errors — `maestro.from`
 
+### Define a typed domain error
+
+Keep errors in your app (Maestro does not ship HTTP error classes). Use a class so `instanceof` and TypeScript agree:
+
 ```ts
+class UserNotFoundError extends Error {
+  readonly code = "USER_NOT_FOUND" as const;
+  readonly statusCode = 404;
+
+  constructor(readonly userId: string) {
+    super(`User ${userId} not found`);
+    this.name = "UserNotFoundError";
+  }
+}
+```
+
+### Throw in the route, map in `from`
+
+`maestro.from` narrows `err` to the class you pass. You get `userId`, `code`, `statusCode` without casting:
+
+```ts
+app.get(
+  "/users/:id",
+  maestro(async (req, res) => {
+    const user = await repository.getById(req.params.id);
+    if (!user) throw new UserNotFoundError(req.params.id);
+    res.json(user);
+  })
+);
+
 app.use(
   maestro.from(UserNotFoundError, (err, req, res, next) => {
-    res.status(404).json({ error: err.message });
+    // err is UserNotFoundError
+    res.status(err.statusCode).json({
+      code: err.code,
+      userId: err.userId,
+      message: err.message,
+    });
   })
 );
 
@@ -79,7 +113,16 @@ app.use((err, req, res, next) => {
 });
 ```
 
-Unmatched errors fall through to the next error middleware.
+Unmatched errors fall through to the next error middleware. Stack several `maestro.from(...)` calls for each domain type; keep one generic handler last.
+
+Optional pattern for your codebase (not exported by Maestro):
+
+```ts
+abstract class DomainError extends Error {
+  abstract readonly code: string;
+  abstract readonly statusCode: number;
+}
+```
 
 ## Compared to alternatives
 

@@ -14,9 +14,11 @@ O diferencial de verdade é o `maestro.from(ErrorClass, handler)`.
 
 A maioria dos wrappers só resolve a metade técnica: o erro chega no middleware. O que sobra é um `app.use((err, req, res, next) => …)` gigante com `if/else` ou `instanceof` empilhado. Status HTTP, mensagem pro cliente e log misturados no mesmo bloco.
 
-Com o `from`, cada erro de domínio vira um middleware pequeno. `UserNotFoundError` responde 404. `PaymentFailedError` responde 402. O genérico no fim só pega o que ninguém mapeou. A rota só precisa `throwar` o erro. Quem lê o código vê a regra de negócio no nome da classe, não enterrada num catch-all.
+Com o `from`, cada erro de domínio vira um middleware pequeno. `UserNotFoundError` responde 404. `PaymentFailedError` responde 402. O genérico no fim só pega o que ninguém mapeou. A rota só precisa `throw` o erro. Quem lê o código vê a regra de negócio no nome da classe, não enterrada num catch-all.
 
-Isso muda o desenho: erro passa a ser contrato entre camadas, não string solta. No TypeScript a classe tipa o handler. Em app nova no Express 5 o wrap async pode sobrar, mas o `from` ainda vale se você quiser esse roteamento sem reinventar.
+Isso muda o desenho: erro passa a ser contrato entre camadas, não string solta. No TypeScript o `from` estreita o `err` pra classe que você passou (`userId`, `code`, `statusCode` sem cast). Em app nova no Express 5 o wrap async pode sobrar, mas o `from` ainda vale se você quiser esse roteamento sem reinventar.
+
+Exemplo mínimo da tipagem está no [README](../README.md#domain-errors--maestrofrom).
 
 Zero dependência de runtime.
 
